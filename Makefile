@@ -247,9 +247,9 @@ ifeq (,$(findstring clean,$(MAKECMDGOALS)))
 endif
 
 .gitignore:
-	@echo "/$(OBJ_DIR:./%=%)/*" >> .gitignore
-	@echo "/$(DEP_DIR:./%=%)/*" >> .gitignore
-	@echo "/$(LIB_DIR:./%=%)/*" >> .gitignore
+	@echo "/$(OBJ_DIR:./%=%)/" >> .gitignore
+	@echo "/$(DEP_DIR:./%=%)/" >> .gitignore
+	@echo "/$(LIB_DIR:./%=%)/" >> .gitignore
 	@echo "/$(OUT)" >> .gitignore
 	@echo "/$(STDOUT_LOG)" >> .gitignore
 	@echo "!**/.gitkeep" >> .gitignore
