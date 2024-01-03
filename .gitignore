@@ -30,3 +30,10 @@
 *.exe
 *.out
 *.app
+
+/src/.obj/
+/src/.dep/
+/lib/
+/out
+/out.log
+!**/.gitkeep
