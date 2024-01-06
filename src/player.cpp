@@ -30,10 +30,9 @@ Player::Player(b2World& world, b2Vec2 position):
         constructPlayerShape(),
         Player::density,
         EntityType::PLAYER
-    ) {
-}
+    ) {}
 
 void Player::render() const {
     auto rlPos = raylibPosition();
-    DrawCircle(rlPos.x, rlPos.y, metersToPixels(Player::radius), RED);
+    DrawCircleLines(rlPos.x, rlPos.y, metersToPixels(Player::radius), RED);
 }

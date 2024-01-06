@@ -8,6 +8,7 @@
 #include <raymath.h>
 
 class Entity {
+protected:
     b2Body *body;
     b2Shape *shape;
     b2Fixture *fixture;

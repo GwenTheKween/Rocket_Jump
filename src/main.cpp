@@ -2,6 +2,7 @@
 #include <box2d/box2d.h>
 #include "player.hpp"
 #include "wall.hpp"
+#include "rocket.hpp"
 #include "world.hpp"
 
 class ContactListener: public b2ContactListener {
@@ -48,6 +49,7 @@ int main(int argc, char *argv[]) {
 
     auto player = Player(world, b2Vec2{0, 0});
     auto wall = Wall(world, b2Vec2{-10, 10}, b2Vec2{20, 5});
+    auto rocket = Rocket(world, player.box2dPosition(), {-1.0f, -1.0f});
     Camera2D camera;
     camera.zoom = 1.0f;
     camera.offset = { screenWidth/2, screenHeight/2 };
@@ -67,6 +69,7 @@ int main(int argc, char *argv[]) {
             BeginMode2D(camera);
                 player.render();
                 wall.render();
+                rocket.render();
             EndMode2D();
         EndDrawing();
     }
