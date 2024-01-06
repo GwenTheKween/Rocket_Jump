@@ -25,8 +25,6 @@ b2Fixture *constructPlayerFixture(b2Body *body, b2Shape *shape) {
     return body->CreateFixture(&fixtureDef);
 }
 
-Player::Player(b2World& world, Vector2 position): Player(world, raylibToBox2d(position)) {}
-
 Player::Player(b2World& world, b2Vec2 position):
     Entity(
         world,

@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     float timeSlice = 0;
 
     b2World world({0.0f, 0.0f});
-    auto player = Player(world, Vector2{0, 0});
+    auto player = Player(world, b2Vec2{0, 0});
     Camera2D camera;
     camera.zoom = 1.0f;
     camera.offset = { screenWidth/2, screenHeight/2 };
