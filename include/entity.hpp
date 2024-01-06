@@ -3,6 +3,8 @@
 #include <box2d/box2d.h>
 #include <functional>
 
+// avoids double definition of vector types
+#include <raylib.h>
 #include <raymath.h>
 
 class Entity {
@@ -26,6 +28,8 @@ public:
 
     b2Vec2 box2dPosition() const;
     Vector2 raylibPosition() const;
+
+    virtual void render() const = 0;
 
     static b2BodyDef defaultBodyDef();
 };

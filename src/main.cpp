@@ -1,7 +1,17 @@
 #include <raylib.h>
 #include <box2d/box2d.h>
 #include "player.hpp"
+#include "wall.hpp"
 #include "world.hpp"
+
+class ContactListener: public b2ContactListener {
+    void BeginContact(b2Contact *contact) {
+        ;
+    }
+
+    void EndContact(b2Contact *contact) {
+    }
+};
 
 int main(int argc, char *argv[]) {
     const int screenWidth = 800;
@@ -10,9 +20,13 @@ int main(int argc, char *argv[]) {
     InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
     SetTargetFPS(60);
     float timeSlice = 0;
+    ContactListener myContactListener;
 
-    b2World world({0.0f, 0.0f});
+    b2World world({0.0f, 10.0f});
+    world.SetContactListener(&myContactListener);
+
     auto player = Player(world, b2Vec2{0, 0});
+    auto wall = Wall(world, b2Vec2{-10, 10}, b2Vec2{20, 5});
     Camera2D camera;
     camera.zoom = 1.0f;
     camera.offset = { screenWidth/2, screenHeight/2 };
@@ -30,7 +44,8 @@ int main(int argc, char *argv[]) {
         BeginDrawing();
             ClearBackground(BLACK);
             BeginMode2D(camera);
-            player.render();
+                player.render();
+                wall.render();
             EndMode2D();
         EndDrawing();
     }
