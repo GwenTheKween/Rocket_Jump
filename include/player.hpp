@@ -16,5 +16,5 @@ public:
 
     Player(b2World& world, b2Vec2 position);
 
-    void render(const Camera2D& camera) const;
+    void render() const;
 };

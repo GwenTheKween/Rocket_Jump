@@ -34,7 +34,7 @@ Player::Player(b2World& world, b2Vec2 position):
     ) {
 }
 
-void Player::render(const Camera2D& camera) const {
+void Player::render() const {
     auto rlPos = raylibPosition();
     DrawCircle(rlPos.x, rlPos.y, metersToPixels(Player::radius), RED);
 }
