@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
         BeginDrawing();
             ClearBackground(BLACK);
             BeginMode2D(camera);
-            player.render(camera);
+            player.render();
             EndMode2D();
         EndDrawing();
     }
