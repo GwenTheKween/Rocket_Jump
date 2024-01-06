@@ -34,5 +34,5 @@ Wall::Wall(b2World& world, b2Vec2 position, b2Vec2 dimensions)
 
 void Wall::render() const {
     Vector2 position = raylibPosition();
-    DrawRectangle(position.x, position.y, pixelDimensions.x, pixelDimensions.y, WHITE);
+    DrawRectangleLines(position.x, position.y, pixelDimensions.x, pixelDimensions.y, WHITE);
 }

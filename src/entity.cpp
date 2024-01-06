@@ -4,8 +4,12 @@
 
 #include "world.hpp"
 
-b2Fixture *make_fixture(b2Body *body, b2Shape *shape, float fixtureDensity) {
-    return body->CreateFixture(shape, fixtureDensity);
+b2Fixture *make_fixture(Entity *entity, b2Body *body, b2Shape *shape, float fixtureDensity) {
+    b2FixtureDef fixtureDef;
+    fixtureDef.shape = shape;
+    fixtureDef.density = fixtureDensity;
+    fixtureDef.userData.pointer = reinterpret_cast<uintptr_t>(entity);
+    return body->CreateFixture(&fixtureDef);
 }
 
 void Entity::swap(Entity& other) {
@@ -26,7 +30,7 @@ Entity::Entity(b2World& world, b2Body *body, b2Shape *shape, float fixtureDensit
     world(world),
     body(body),
     shape(shape),
-    fixture(make_fixture(body, shape, fixtureDensity)) {
+    fixture(make_fixture(this, body, shape, fixtureDensity)) {
 }
 
 Entity::Entity(Entity&& e): world(e.world) {
