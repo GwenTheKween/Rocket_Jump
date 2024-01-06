@@ -5,10 +5,8 @@
 #include "world.hpp"
 
 b2Body *constructPlayerBody(b2World& world, b2Vec2 spawnPosition) {
-    b2BodyDef bodyDef;
+    b2BodyDef bodyDef = Entity::defaultBodyDef();
     bodyDef.position = std::move(spawnPosition);
-    bodyDef.type = b2_dynamicBody;
-    bodyDef.fixedRotation = true;
     return world.CreateBody(&bodyDef);
 }
 

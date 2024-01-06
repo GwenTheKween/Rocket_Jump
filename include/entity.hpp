@@ -13,10 +13,6 @@ class Entity {
 
     void swap(Entity& other);
 
-protected:
-    // defaults to a fixed-rotation dynamic object
-    static b2BodyDef defaultBodyDef();
-
 public:
     Entity(b2World& world, b2Body *body, b2Shape *shape, float fixtureDensity);
 
@@ -30,4 +26,6 @@ public:
 
     b2Vec2 box2dPosition() const;
     Vector2 raylibPosition() const;
+
+    static b2BodyDef defaultBodyDef();
 };
