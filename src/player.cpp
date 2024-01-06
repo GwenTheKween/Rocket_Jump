@@ -28,7 +28,8 @@ Player::Player(b2World& world, b2Vec2 position):
         world,
         constructPlayerBody(world, position),
         constructPlayerShape(),
-        Player::density
+        Player::density,
+        EntityType::PLAYER
     ) {
 }
 

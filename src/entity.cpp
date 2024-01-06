@@ -26,14 +26,15 @@ b2BodyDef Entity::defaultBodyDef() {
     return def;
 }
 
-Entity::Entity(b2World& world, b2Body *body, b2Shape *shape, float fixtureDensity):
+Entity::Entity(b2World& world, b2Body *body, b2Shape *shape, float fixtureDensity, EntityType type):
     world(world),
     body(body),
     shape(shape),
-    fixture(make_fixture(this, body, shape, fixtureDensity)) {
+    fixture(make_fixture(this, body, shape, fixtureDensity)),
+    type(type) {
 }
 
-Entity::Entity(Entity&& e): world(e.world) {
+Entity::Entity(Entity&& e): world(e.world), type(e.type) {
     this->swap(e);
 }
 
@@ -54,4 +55,16 @@ b2Vec2 Entity::box2dPosition() const {
 
 Vector2 Entity::raylibPosition() const {
     return box2dToRaylib(box2dPosition());
+}
+
+Entity *Entity::fromUserDataPointer(uintptr_t pointer) {
+    return reinterpret_cast<Entity *>(pointer);
+}
+
+Entity *Entity::fromFixture(const b2Fixture *fixture) {
+    return Entity::fromUserDataPointer(fixture->GetUserData().pointer);
+}
+
+uintptr_t Entity::toUserDataPointer() {
+    return reinterpret_cast<uintptr_t>(this);
 }

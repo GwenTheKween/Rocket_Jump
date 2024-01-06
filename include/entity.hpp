@@ -16,7 +16,15 @@ class Entity {
     void swap(Entity& other);
 
 public:
-    Entity(b2World& world, b2Body *body, b2Shape *shape, float fixtureDensity);
+    enum class EntityType {
+        PLAYER,
+        TERRAIN,
+        ROCKET,
+        EXPLOSION
+    };
+    const EntityType type;
+
+    Entity(b2World& world, b2Body *body, b2Shape *shape, float fixtureDensity, EntityType type);
 
     Entity(Entity&& p);
     Entity(const Entity& p) = delete;
@@ -32,4 +40,8 @@ public:
     virtual void render() const = 0;
 
     static b2BodyDef defaultBodyDef();
+
+    static Entity *fromUserDataPointer(uintptr_t pointer);
+    static Entity *fromFixture(const b2Fixture *fixture);
+    uintptr_t toUserDataPointer();
 };
