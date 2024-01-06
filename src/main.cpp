@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
         timeSlice += GetFrameTime();
         if (timeSlice >= SIMULATION_STEP_INTERVAL) {
             world.Step(SIMULATION_STEP_INTERVAL, SIMULATION_VELOCITY_ITER, SIMULATION_POSITION_ITER);
-            timeSlice = 0;
+            timeSlice -= SIMULATION_STEP_INTERVAL;
         }
 
         // camera.target = player.raylibPosition();
