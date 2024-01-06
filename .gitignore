@@ -34,6 +34,6 @@
 /src/.obj/
 /src/.dep/
 /lib/
-/out
+/rj
 /out.log
 !**/.gitkeep

@@ -61,13 +61,16 @@ COMP_FILE := o
 SRC_PTRN := "*."$(SRC_FILE)
 
 # Output file name
-OUT := out
+OUT := rj
+ifeq ($(OS),Windows_NT)
+	OUT := $(OUT).exe
+endif
 
 # Library names without `-l` prefix
 # e.g.: if you use math.h and GL/gl.h, instead of `-lm -lGL`,
 # set the definition to
 #     LIBS := m GL
-LIBS := raylib
+LIBS := raylib box2d
 ifeq ($(OS),Windows_NT)
 	LIBS += opengl32 gdi32 winmm
 endif
