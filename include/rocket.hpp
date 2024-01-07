@@ -1,3 +1,5 @@
+#pragma once
+
 #include "entity.hpp"
 
 class Rocket: public Entity {
@@ -19,5 +21,5 @@ public:
     Rocket(b2World& world, b2Vec2 position, b2Vec2 direction);
 
     void render() const;
-    void step(float deltaTime);
+    void update(float deltaTime);
 };

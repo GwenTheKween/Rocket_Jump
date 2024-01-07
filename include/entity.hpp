@@ -35,6 +35,7 @@ public:
 
     ~Entity();
 
+    virtual void update(float deltaTime) = 0;
     b2Vec2 box2dPosition() const;
     Vector2 raylibPosition() const;
 

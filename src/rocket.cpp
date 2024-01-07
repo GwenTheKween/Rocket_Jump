@@ -50,6 +50,6 @@ void Rocket::render() const {
     DrawTriangleLines(r1, r3, r2, BLUE);
 }
 
-void Rocket::step(float deltaTime) {
+void Rocket::update(float deltaTime) {
     remainingTime -= deltaTime;
 }

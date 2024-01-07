@@ -15,6 +15,7 @@ public:
     static constexpr float density = mass / approxArea;
 
     Player(b2World& world, b2Vec2 position);
+    void update(float deltaTime);
 
     void render() const;
 };

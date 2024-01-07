@@ -36,3 +36,9 @@ void Player::render() const {
     auto rlPos = raylibPosition();
     DrawCircleLines(rlPos.x, rlPos.y, metersToPixels(Player::radius), RED);
 }
+
+void Player::update(float deltaTime) {
+    // TODO make it so the player has maxRockets charges instead of a single one
+    currentReload -= deltaTime;
+}
+
