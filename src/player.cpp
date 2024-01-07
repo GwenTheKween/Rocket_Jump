@@ -42,3 +42,13 @@ void Player::update(float deltaTime) {
     currentReload -= deltaTime;
 }
 
+Rocket *Player::shootRocketTowards(b2Vec2 target) {
+    if (currentReload > 0) {
+        return nullptr;
+    }
+    auto pos = box2dPosition();
+    b2Vec2 direction = target - pos;
+    direction.Normalize();
+    currentReload = Player::reloadTime;
+    return new Rocket(world, pos, direction);
+}

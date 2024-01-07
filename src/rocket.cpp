@@ -53,3 +53,15 @@ void Rocket::render() const {
 void Rocket::update(float deltaTime) {
     remainingTime -= deltaTime;
 }
+
+void Rocket::collide() {
+    remainingTime = 0;
+}
+
+bool Rocket::hasExploded() {
+    return remainingTime <= 0;
+}
+
+void Rocket::explode() {
+    // TODO spawn explosion
+}

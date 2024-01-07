@@ -15,11 +15,14 @@ public:
     static constexpr float approxArea = radius * radius;
     static constexpr float density = mass / approxArea;
     static constexpr float speed = 30;
-    static constexpr float lifetime = 3;
+    static constexpr float lifetime = 1.5;
 
     // direction will be normalized internally, can accept any non-null vector
     Rocket(b2World& world, b2Vec2 position, b2Vec2 direction);
 
     void render() const;
     void update(float deltaTime);
+    void collide();
+    bool hasExploded();
+    void explode();
 };
