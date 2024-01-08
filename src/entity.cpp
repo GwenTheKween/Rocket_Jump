@@ -4,11 +4,21 @@
 
 #include "world.hpp"
 
-b2Fixture *make_fixture(Entity *entity, b2Body *body, b2Shape *shape, float fixtureDensity) {
+b2Fixture *make_fixture(
+    Entity *entity,
+    b2Body *body,
+    b2Shape *shape,
+    float fixtureDensity,
+    int collisionCategory,
+    int collisionMask
+) {
     b2FixtureDef fixtureDef;
     fixtureDef.shape = shape;
     fixtureDef.density = fixtureDensity;
-    fixtureDef.userData.pointer = reinterpret_cast<uintptr_t>(entity);
+    fixtureDef.userData.pointer = entity->toUserDataPointer();
+    fixtureDef.isSensor = collisionCategory == Entity::EntityType::EXPLOSION;
+    fixtureDef.filter.categoryBits = collisionCategory;
+    fixtureDef.filter.maskBits = collisionMask;
     return body->CreateFixture(&fixtureDef);
 }
 
@@ -26,13 +36,26 @@ b2BodyDef Entity::defaultBodyDef() {
     return def;
 }
 
-Entity::Entity(b2World& world, b2Body *body, b2Shape *shape, float fixtureDensity, EntityType type):
+Entity::Entity(
+    b2World& world,
+    b2Body *body,
+    b2Shape *shape,
+    float fixtureDensity,
+    EntityType type,
+    int collisionMask
+):
     world(world),
     body(body),
     shape(shape),
-    fixture(make_fixture(this, body, shape, fixtureDensity)),
-    type(type) {
-}
+    fixture(make_fixture(
+        this,
+        body,
+        shape,
+        fixtureDensity,
+        type,
+        collisionMask
+    )),
+    type(type) {}
 
 Entity::Entity(Entity&& e): world(e.world), type(e.type) {
     this->swap(e);

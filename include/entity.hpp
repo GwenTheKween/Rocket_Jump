@@ -17,15 +17,22 @@ protected:
     void swap(Entity& other);
 
 public:
-    enum class EntityType {
-        PLAYER,
-        TERRAIN,
-        ROCKET,
-        EXPLOSION
+    enum EntityType {
+        PLAYER = 0x0001,
+        TERRAIN = 0x0002,
+        ROCKET = 0x0004,
+        EXPLOSION = 0x0008
     };
     const EntityType type;
 
-    Entity(b2World& world, b2Body *body, b2Shape *shape, float fixtureDensity, EntityType type);
+    Entity(
+        b2World& world,
+        b2Body *body,
+        b2Shape *shape,
+        float fixtureDensity,
+        EntityType type,
+        int collisionMask
+    );
 
     Entity(Entity&& p);
     Entity(const Entity& p) = delete;

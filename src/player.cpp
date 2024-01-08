@@ -29,7 +29,8 @@ Player::Player(b2World& world, b2Vec2 position):
         constructPlayerBody(world, position),
         constructPlayerShape(),
         Player::density,
-        EntityType::PLAYER
+        EntityType::PLAYER,
+        EntityType::TERRAIN | EntityType::EXPLOSION
     ) {}
 
 void Player::render() const {

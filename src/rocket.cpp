@@ -23,9 +23,11 @@ Rocket::Rocket(b2World& world, b2Vec2 position, b2Vec2 direction)
         constructRocketBody(world, position, direction),
         constructRocketShape(),
         Rocket::density,
-        Entity::EntityType::ROCKET
+        Entity::EntityType::ROCKET,
+        Entity::EntityType::TERRAIN
     ),
-    direction(direction) {
+    direction(direction),
+    remainingTime(Rocket::lifetime) {
 
     this->direction.Normalize();
 }

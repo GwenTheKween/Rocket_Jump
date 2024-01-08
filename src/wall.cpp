@@ -29,7 +29,8 @@ Wall::Wall(b2World& world, b2Vec2 position, b2Vec2 dimensions)
         constructWallBody(world, position),
         constructWallShape(dimensions),
         Wall::density,
-        EntityType::TERRAIN
+        EntityType::TERRAIN,
+        EntityType::PLAYER | EntityType::ROCKET
     ),
     pixelDimensions(box2dToRaylib(dimensions)) {}
 
