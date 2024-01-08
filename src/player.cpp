@@ -34,21 +34,38 @@ Player::Player(b2World& world, b2Vec2 position):
 
 void Player::render() const {
     auto rlPos = raylibPosition();
-    DrawCircleLines(rlPos.x, rlPos.y, metersToPixels(Player::radius), RED);
+    DrawCircleV(rlPos, metersToPixels(Player::radius), RED);
 }
 
 void Player::update(float deltaTime) {
-    // TODO make it so the player has maxRockets charges instead of a single one
+    if (ammo >= Player::maxRockets) {
+        // keep reload progress frozen while at full ammo
+        currentReload = Player::reloadTime;
+        return;
+    }
+
     currentReload -= deltaTime;
+    if (currentReload <= 0) {
+        ammo++;
+        currentReload = Player::reloadTime;
+    }
+}
+
+int Player::getAmmo() const {
+    return this->ammo;
+}
+
+float Player::getReload() const {
+    return this->currentReload;
 }
 
 Rocket *Player::shootRocketTowards(b2Vec2 target) {
-    if (currentReload > 0) {
+    if (ammo <= 0) {
         return nullptr;
     }
     auto pos = box2dPosition();
     b2Vec2 direction = target - pos;
     direction.Normalize();
-    currentReload = Player::reloadTime;
+    ammo--;
     return new Rocket(world, pos, direction);
 }

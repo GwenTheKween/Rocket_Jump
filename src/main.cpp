@@ -1,6 +1,8 @@
 #include <raylib.h>
 #include <box2d/box2d.h>
 #include <array>
+#include <sstream>
+#include <iomanip>
 #include "player.hpp"
 #include "wall.hpp"
 #include "rocket.hpp"
@@ -61,6 +63,7 @@ int main(int argc, char *argv[]) {
     Camera2D camera;
     camera.zoom = 1.0f;
     camera.offset = { screenWidth/2, screenHeight/2 };
+    std::stringstream buf;
 
     while (!WindowShouldClose()) {
         timeSlice += GetFrameTime();
@@ -78,7 +81,7 @@ int main(int argc, char *argv[]) {
         // TODO more refined camera movement
         // camera.target = player.raylibPosition();
 
-        if (IsMouseButtonDown(MouseButton::MOUSE_BUTTON_LEFT)) {
+        if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT)) {
             Vector2 mousePositionScreen = GetMousePosition();
             Vector2 mousePositionCamera = GetScreenToWorld2D(mousePositionScreen, camera);
             b2Vec2 mousePositionWorld = raylibToBox2d(mousePositionCamera);
@@ -100,6 +103,16 @@ int main(int argc, char *argv[]) {
                 }
                 // rocket.render();
             EndMode2D();
+
+            buf.clear();
+            buf.str("");
+            buf << player.getAmmo();
+            DrawText(buf.str().c_str(), 0, 0, 30, WHITE);
+
+            buf.clear();
+            buf.str("");
+            buf << std::setprecision(1) << std::fixed << player.getReload();
+            DrawText(buf.str().c_str(), 0, 30, 30, WHITE);
         EndDrawing();
     }
 
