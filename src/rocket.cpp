@@ -60,10 +60,11 @@ void Rocket::collide() {
     remainingTime = 0;
 }
 
-bool Rocket::hasExploded() {
+bool Rocket::shouldExplodeByAge() {
     return remainingTime <= 0;
 }
 
-void Rocket::explode() {
+Explosion *Rocket::spawnExplosion(b2Vec2 position) {
     // TODO spawn explosion
+    return nullptr;
 }

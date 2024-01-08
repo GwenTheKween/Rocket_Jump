@@ -3,13 +3,41 @@
 #include <array>
 #include <sstream>
 #include <iomanip>
+#include <queue>
 #include "player.hpp"
 #include "wall.hpp"
 #include "rocket.hpp"
 #include "world.hpp"
+#include "explosion.hpp"
+
+void explode(std::queue<Explosion *>& explosions, Rocket *rocket, b2Vec2 position) {
+    // if it explodes in the air, spawn explosion at its center
+    auto explosion = rocket->spawnExplosion(rocket->box2dPosition());
+    explosions.push(explosion);
+    delete rocket;
+}
 
 class ContactListener: public b2ContactListener {
+    std::queue<Explosion *>& explosions;
+public:
+    ContactListener(std::queue<Explosion *>& explosions): explosions(explosions) {}
     void BeginContact(b2Contact *contact) {
+        using Type = Entity::EntityType;
+        Entity *a = Entity::fromFixture(contact->GetFixtureA());
+        Entity *b = Entity::fromFixture(contact->GetFixtureB());
+
+        if (b->type == Type::ROCKET) {
+            std::swap(a, b);
+        }
+
+        if (a->type == Type::ROCKET && b->type == Type::TERRAIN) {
+            b2WorldManifold manifold;
+            contact->GetWorldManifold(&manifold);
+
+            // always spawns explosions in the first contact point
+            // maybe fix this later, but it probably doesn't matter
+            explode(explosions, dynamic_cast<Rocket *>(a), manifold.points[0]);
+        }
     }
 
     void EndContact(b2Contact *contact) {
@@ -54,18 +82,19 @@ int main(int argc, char *argv[]) {
     SetTargetFPS(60);
 
     float timeSlice = 0;
-    ContactListener myContactListener;
-    ContactFilter myContactFilter;
 
     b2World world({0.0f, 10.0f});
-    world.SetContactListener(&myContactListener);
-    world.SetContactFilter(&myContactFilter);
 
     auto player = Player(world, b2Vec2{0, 0});
     auto wall = Wall(world, b2Vec2{-10, 10}, b2Vec2{20, 5});
     std::array<Rocket *, Player::maxRockets> rockets;
     int rocketIndex = 0;
-    // TODO std::queue<Explosion *> explosions
+    std::queue<Explosion *> explosions;
+
+    ContactListener myContactListener(explosions);
+    // ContactFilter myContactFilter;
+    world.SetContactListener(&myContactListener);
+    // world.SetContactFilter(&myContactFilter);
 
     Camera2D camera;
     camera.zoom = 1.0f;
@@ -77,9 +106,14 @@ int main(int argc, char *argv[]) {
         if (timeSlice >= SIMULATION_STEP_INTERVAL) {
             world.Step(SIMULATION_STEP_INTERVAL, SIMULATION_VELOCITY_ITER, SIMULATION_POSITION_ITER);
             player.update(SIMULATION_STEP_INTERVAL);
-            for (Rocket *rocket: rockets) {
-                if (rocket != nullptr)
+            for (Rocket *&rocket: rockets) {
+                if (rocket != nullptr) {
                     rocket->update(SIMULATION_STEP_INTERVAL);
+                    if (rocket->shouldExplodeByAge()) {
+                        explode(explosions, rocket, rocket->box2dPosition());
+                        rocket = nullptr;
+                    }
+                }
             }
             // explosions.update(SIMULATION_STEP_INTERVAL);
             timeSlice -= SIMULATION_STEP_INTERVAL;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "entity.hpp"
+#include "explosion.hpp"
 
 class Rocket: public Entity {
     b2Vec2 direction;
@@ -15,7 +16,7 @@ public:
     static constexpr float approxArea = radius * radius;
     static constexpr float density = mass / approxArea;
     static constexpr float speed = 30;
-    static constexpr float lifetime = 1.5;
+    static constexpr float lifetime = 0.5;
 
     // direction will be normalized internally, can accept any non-null vector
     Rocket(b2World& world, b2Vec2 position, b2Vec2 direction);
@@ -23,6 +24,6 @@ public:
     void render() const;
     void update(float deltaTime);
     void collide();
-    bool hasExploded();
-    void explode();
+    bool shouldExplodeByAge();
+    Explosion *spawnExplosion(b2Vec2 position);
 };
