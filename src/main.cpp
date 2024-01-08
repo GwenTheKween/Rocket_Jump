@@ -27,8 +27,8 @@ class ContactFilter: public b2ContactFilter {
             std::swap(fixtureA, fixtureB);
         }
 
-        // we dont want rockets colliding with players, as they would either or both
-        // push the player and explode immediately
+        // we dont want rockets colliding with players, as they would
+        // push the player and/or explode immediately
         if (a->type == Types::PLAYER && b->type == Types::ROCKET)
             return false;
 
@@ -39,12 +39,20 @@ class ContactFilter: public b2ContactFilter {
     }
 };
 
+template<typename T>
+void write(const T& what, int x, int y, float fontSize, Color color) {
+    std::stringstream buf;
+    buf << std::fixed << std::setprecision(2) << what;
+    DrawText(buf.str().c_str(), x, y, fontSize, color);
+}
+
 int main(int argc, char *argv[]) {
     const int screenWidth = 800;
     const int screenHeight = 450;
 
     InitWindow(screenWidth, screenHeight, "Rocket Jump!");
     SetTargetFPS(60);
+
     float timeSlice = 0;
     ContactListener myContactListener;
     ContactFilter myContactFilter;
@@ -59,7 +67,6 @@ int main(int argc, char *argv[]) {
     int rocketIndex = 0;
     // TODO std::queue<Explosion *> explosions
 
-    // auto rocket = Rocket(world, player.box2dPosition(), {-1.0f, -1.0f});
     Camera2D camera;
     camera.zoom = 1.0f;
     camera.offset = { screenWidth/2, screenHeight/2 };
@@ -104,15 +111,8 @@ int main(int argc, char *argv[]) {
                 // rocket.render();
             EndMode2D();
 
-            buf.clear();
-            buf.str("");
-            buf << player.getAmmo();
-            DrawText(buf.str().c_str(), 0, 0, 30, WHITE);
-
-            buf.clear();
-            buf.str("");
-            buf << std::setprecision(1) << std::fixed << player.getReload();
-            DrawText(buf.str().c_str(), 0, 30, 30, WHITE);
+            write(player.getAmmo(), 0, 0, 32, WHITE);
+            write(player.getReload(), 0, 32, 32, WHITE);
         EndDrawing();
     }
 
