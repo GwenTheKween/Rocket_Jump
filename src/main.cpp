@@ -82,11 +82,11 @@ int main(int argc, char *argv[]) {
     int rocketIndex = 0;
     std::queue<Explosion *> explosions;
 
-    ContactListener myContactListener(explosions);
-    world.SetContactListener(&myContactListener);
+    ContactListener cl(explosions);
+    world.SetContactListener(&cl);
 
     Camera2D camera;
-    camera.zoom = 1.0f;
+    camera.zoom = 2.0f;
     camera.offset = { screenWidth/2, screenHeight/2 };
     std::stringstream buf;
 
@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
                         explode(explosions, rocket, rocket->box2dPosition());
                 }
             }
-            myContactListener.doExplodeIfNeeded();
+            cl.doExplodeIfNeeded();
             for (Rocket *&rocketRef: rockets) {
                 if (rocketRef != nullptr && rocketRef->hasExploded()) {
                     delete rocketRef;

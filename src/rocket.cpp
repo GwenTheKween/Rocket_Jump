@@ -26,7 +26,8 @@ Rocket::Rocket(b2World& world, b2Vec2 position, b2Vec2 direction)
         Entity::EntityType::TERRAIN
     ),
     direction(direction),
-    remainingTime(Rocket::lifetime) {
+    remainingTime(Rocket::lifetime),
+    wasDestroyed(false) {
 
     this->direction.Normalize();
 }
