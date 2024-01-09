@@ -154,15 +154,15 @@ int main(int argc, char *argv[]) {
         BeginDrawing();
             ClearBackground(BLACK);
             BeginMode2D(camera);
-                player.render();
-                wall.render();
+                for (const Explosion *explosion: explosions) {
+                    explosion->render();
+                }
                 for (const Rocket *rocket: rockets) {
                     if (rocket != nullptr)
                         rocket->render();
                 }
-                for (const Explosion *explosion: explosions) {
-                    explosion->render();
-                }
+                player.render();
+                wall.render();
             EndMode2D();
 
             write(player.getAmmo(), 0, 0, 32, WHITE);

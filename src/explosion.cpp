@@ -1,6 +1,23 @@
 #include "explosion.hpp"
 
+#include <cmath>
+
 #include "world.hpp"
+
+float clamp01(float t) {
+    if (t < 0) return 0;
+    if (t > 1) return 1;
+    return t;
+}
+
+float explosionExpansionEasing(float t) {
+    t = clamp01(t);
+    return 1 - std::pow(1 - t, 3);
+}
+
+float lerp(float a, float b, float t) {
+    return a * (1-t) + b * t;
+}
 
 b2Body *constructExplosionBody(b2World& world, b2Vec2 position) {
     b2BodyDef bodyDef = Entity::defaultBodyDef();
@@ -24,12 +41,13 @@ Explosion::Explosion(b2World& world, b2Vec2 position):
         Entity::EntityType::EXPLOSION,
         Entity::EntityType::PLAYER
     ),
-    timeAlive(0) {}
+    timeAliveRatio(0) {}
 
 void Explosion::update(float deltaTime) {
-    timeAlive += deltaTime;
+    timeAliveRatio += deltaTime / Explosion::lifetime;
+    float easedExpansionTime = explosionExpansionEasing(timeAliveRatio);
     // TODO apply easing function here
-    shape->m_radius = Explosion::initialRadius + Explosion::radiusIncreasePerSecond * timeAlive;
+    shape->m_radius = lerp(Explosion::initialRadius, Explosion::maxRadius, easedExpansionTime);
 }
 
 void Explosion::render() const {
@@ -39,7 +57,7 @@ void Explosion::render() const {
 }
 
 bool Explosion::isOver() const {
-    return timeAlive >= Explosion::lifetime;
+    return timeAliveRatio >= 1.0f;
 }
 
 float Explosion::calculateStrength() const {
