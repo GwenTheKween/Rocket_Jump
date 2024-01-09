@@ -6,6 +6,7 @@
 class Rocket: public Entity {
     b2Vec2 direction;
     float remainingTime;
+    bool wasDestroyed;
 public:
     static constexpr float radius = 0.5;
 
@@ -23,7 +24,7 @@ public:
 
     void render() const;
     void update(float deltaTime);
-    void collide();
-    bool shouldExplodeByAge();
+    bool shouldExplodeByAge() const;
+    bool hasExploded() const;
     Explosion *spawnExplosion(b2Vec2 position);
 };

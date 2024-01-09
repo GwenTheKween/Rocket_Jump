@@ -3,7 +3,6 @@
 
 b2Body *constructRocketBody(b2World& world, b2Vec2 position, b2Vec2 direction) {
     b2BodyDef bodyDef = Entity::defaultBodyDef();
-    bodyDef.type = b2_kinematicBody;
     bodyDef.position = position;
     bodyDef.gravityScale = 0;
     direction.Normalize();
@@ -33,7 +32,7 @@ Rocket::Rocket(b2World& world, b2Vec2 position, b2Vec2 direction)
 }
 
 void Rocket::render() const {
-    static float halfRoot3 = 0.5f * sqrt(3);
+    static const float halfRoot3 = 0.5f * sqrt(3);
 
     // head
     auto v1 = Rocket::triangleToRadiusRatio * Rocket::radius * direction;
@@ -56,15 +55,16 @@ void Rocket::update(float deltaTime) {
     remainingTime -= deltaTime;
 }
 
-void Rocket::collide() {
-    remainingTime = 0;
-}
-
-bool Rocket::shouldExplodeByAge() {
+bool Rocket::shouldExplodeByAge() const {
     return remainingTime <= 0;
 }
 
+bool Rocket::hasExploded() const {
+    return wasDestroyed;
+}
+
 Explosion *Rocket::spawnExplosion(b2Vec2 position) {
+    wasDestroyed = true;
     // TODO spawn explosion
     return nullptr;
 }

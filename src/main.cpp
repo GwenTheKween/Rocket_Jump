@@ -12,15 +12,19 @@
 
 void explode(std::queue<Explosion *>& explosions, Rocket *rocket, b2Vec2 position) {
     // if it explodes in the air, spawn explosion at its center
-    auto explosion = rocket->spawnExplosion(rocket->box2dPosition());
+    auto explosion = rocket->spawnExplosion(position);
     explosions.push(explosion);
-    delete rocket;
+    // DO NOT DELETE ROCKET
+    // this is done in the cleanup stage of spawning explosions
 }
 
 class ContactListener: public b2ContactListener {
     std::queue<Explosion *>& explosions;
+    Rocket *explodingRocket;
+    bool shouldPopExplosion;
+    b2Vec2 explosionLocation;
 public:
-    ContactListener(std::queue<Explosion *>& explosions): explosions(explosions) {}
+    ContactListener(std::queue<Explosion *>& explosions): explosions(explosions), shouldPopExplosion(false) {}
     void BeginContact(b2Contact *contact) {
         using Type = Entity::EntityType;
         Entity *a = Entity::fromFixture(contact->GetFixtureA());
@@ -33,37 +37,24 @@ public:
         if (a->type == Type::ROCKET && b->type == Type::TERRAIN) {
             b2WorldManifold manifold;
             contact->GetWorldManifold(&manifold);
+            shouldPopExplosion = true;
+            explodingRocket = dynamic_cast<Rocket *>(a);
 
             // always spawns explosions in the first contact point
             // maybe fix this later, but it probably doesn't matter
-            explode(explosions, dynamic_cast<Rocket *>(a), manifold.points[0]);
+            explosionLocation = manifold.points[0];
+
         }
     }
 
     void EndContact(b2Contact *contact) {
     }
-};
 
-class ContactFilter: public b2ContactFilter {
-    bool ShouldCollide(b2Fixture *fixtureA, b2Fixture *fixtureB) {
-        using Types = Entity::EntityType;
-        Entity *a = Entity::fromFixture(fixtureA);
-        Entity *b = Entity::fromFixture(fixtureB);
-
-        if (b->type == Types::PLAYER) {
-            std::swap(a, b);
-            std::swap(fixtureA, fixtureB);
+    void doExplodeIfNeeded() {
+        if (shouldPopExplosion) {
+            explode(explosions, explodingRocket, explosionLocation);
+            shouldPopExplosion = false;
         }
-
-        // we dont want rockets colliding with players, as they would
-        // push the player and/or explode immediately
-        if (a->type == Types::PLAYER && b->type == Types::ROCKET)
-            return false;
-
-        if ((a->type == Types::ROCKET || a->type == Types::EXPLOSION)
-            && (b->type == Types::ROCKET || b->type == Types::EXPLOSION))
-            return false;
-        return true;
     }
 };
 
@@ -92,9 +83,7 @@ int main(int argc, char *argv[]) {
     std::queue<Explosion *> explosions;
 
     ContactListener myContactListener(explosions);
-    // ContactFilter myContactFilter;
     world.SetContactListener(&myContactListener);
-    // world.SetContactFilter(&myContactFilter);
 
     Camera2D camera;
     camera.zoom = 1.0f;
@@ -106,16 +95,21 @@ int main(int argc, char *argv[]) {
         if (timeSlice >= SIMULATION_STEP_INTERVAL) {
             world.Step(SIMULATION_STEP_INTERVAL, SIMULATION_VELOCITY_ITER, SIMULATION_POSITION_ITER);
             player.update(SIMULATION_STEP_INTERVAL);
-            for (Rocket *&rocket: rockets) {
+            for (Rocket *rocket: rockets) {
                 if (rocket != nullptr) {
                     rocket->update(SIMULATION_STEP_INTERVAL);
-                    if (rocket->shouldExplodeByAge()) {
+                    if (rocket->shouldExplodeByAge())
                         explode(explosions, rocket, rocket->box2dPosition());
-                        rocket = nullptr;
-                    }
                 }
             }
-            // explosions.update(SIMULATION_STEP_INTERVAL);
+            myContactListener.doExplodeIfNeeded();
+            for (Rocket *&rocketRef: rockets) {
+                if (rocketRef != nullptr && rocketRef->hasExploded()) {
+                    delete rocketRef;
+                    rocketRef = nullptr;
+                }
+            }
+            // TODO explosions.update(SIMULATION_STEP_INTERVAL);
             timeSlice -= SIMULATION_STEP_INTERVAL;
         }
 
