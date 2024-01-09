@@ -8,8 +8,9 @@ class Explosion: public Entity {
 public:
     // static constexpr float radiusIncreasePerSecond = 3;
     static constexpr float lifetime = 0.5f;
-    static constexpr float initialRadius = 1;
-    static constexpr float maxRadius = 4;
+    static constexpr float initialRadius = 1.0f;
+    static constexpr float maxRadius = 4.0f;
+    static constexpr float baseStrength = 4000.0f;
 
     Explosion(b2World& world, b2Vec2 position);
     void render() const;

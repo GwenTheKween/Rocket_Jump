@@ -24,7 +24,6 @@ b2Fixture *make_fixture(
 
 void Entity::swap(Entity& other) {
     body = std::exchange(other.body, body);
-    shape = std::exchange(other.shape, shape);
     fixture = std::exchange(other.fixture, fixture);
     world = std::exchange(other.world, world);
 }
@@ -46,7 +45,6 @@ Entity::Entity(
 ):
     world(world),
     body(body),
-    shape(shape),
     fixture(make_fixture(
         this,
         body,
@@ -55,7 +53,9 @@ Entity::Entity(
         type,
         collisionMask
     )),
-    type(type) {}
+    type(type) {
+    delete shape;
+}
 
 Entity::Entity(Entity&& e): world(e.world), type(e.type) {
     this->swap(e);
@@ -69,7 +69,6 @@ Entity& Entity::operator=(Entity&& p) {
 Entity::~Entity() {
     if (fixture != nullptr) body->DestroyFixture(fixture);
     if (body != nullptr) world.get().DestroyBody(body);
-    delete shape;
 }
 
 b2Vec2 Entity::box2dPosition() const {

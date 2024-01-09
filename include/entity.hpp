@@ -10,7 +10,6 @@
 class Entity {
 protected:
     b2Body *body;
-    b2Shape *shape;
     b2Fixture *fixture;
     std::reference_wrapper<b2World> world;
 

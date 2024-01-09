@@ -36,6 +36,7 @@ Player::Player(b2World& world, b2Vec2 position):
 void Player::render() const {
     auto rlPos = raylibPosition();
     DrawCircleV(rlPos, metersToPixels(Player::radius), RED);
+    // TODO add 3 dots that fill into circles counting ammo
 }
 
 void Player::update(float deltaTime) {
@@ -61,12 +62,21 @@ float Player::getReload() const {
 }
 
 Rocket *Player::shootRocketTowards(b2Vec2 target) {
-    if (ammo <= 0) {
+    if (ammo <= 0)
         return nullptr;
-    }
     auto pos = box2dPosition();
     b2Vec2 direction = target - pos;
     direction.Normalize();
     ammo--;
     return new Rocket(world, pos, direction);
+}
+
+void Player::feelExplosion(const Explosion& explosion) {
+    // this direction approximation is only valid since both the player and
+    // the explosions are circles.
+    // otherwise we'd need to pass in the contact point as well, to determine
+    // the direction
+    b2Vec2 direction = box2dPosition() - explosion.box2dPosition();
+    direction.Normalize();
+    body->ApplyForceToCenter(explosion.calculateStrength() * direction, true);
 }

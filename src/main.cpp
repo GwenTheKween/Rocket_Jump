@@ -54,7 +54,17 @@ public:
             // always spawns explosions in the first contact point
             // maybe fix this later, but it probably doesn't matter
             setupForExplosion(dynamic_cast<Rocket *>(a), manifold.points[0]);
+            return;
         }
+
+        if (b->type == Type::EXPLOSION) {
+            std::swap(a, b);
+        }
+
+        if (a->type == Type::EXPLOSION && b->type == Type::PLAYER) {
+            dynamic_cast<Player *>(b)->feelExplosion(*dynamic_cast<Explosion *>(a));
+        }
+        // TODO explosion - destructible terrain collision
     }
 
     void EndContact(b2Contact *contact) {}

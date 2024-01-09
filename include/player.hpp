@@ -13,11 +13,11 @@ private:
     int ammo;
 public:
     // in meters
-    static constexpr float radius = 1;
-    static constexpr float mass = 1;
+    static constexpr float radius = 1.0f;
+    static constexpr float mass = 1.0f;
     static constexpr float approxArea = radius * radius;
     static constexpr float density = mass / approxArea;
-    static constexpr float reloadTime = 2;
+    static constexpr float reloadTime = 2.0f;
     static constexpr int maxRockets = 3;
 
     // TODO is this really necessary? might detract from fast gameplay
@@ -29,4 +29,5 @@ public:
     int getAmmo() const;
     float getReload() const;
     Rocket *shootRocketTowards(b2Vec2 target);
+    void feelExplosion(const Explosion& explosion);
 };

@@ -46,13 +46,12 @@ Explosion::Explosion(b2World& world, b2Vec2 position):
 void Explosion::update(float deltaTime) {
     timeAliveRatio += deltaTime / Explosion::lifetime;
     float easedExpansionTime = explosionExpansionEasing(timeAliveRatio);
-    // TODO apply easing function here
-    shape->m_radius = lerp(Explosion::initialRadius, Explosion::maxRadius, easedExpansionTime);
+    fixture->GetShape()->m_radius = lerp(Explosion::initialRadius, Explosion::maxRadius, easedExpansionTime);
 }
 
 void Explosion::render() const {
     Vector2 center = raylibPosition();
-    float raylibRadius = metersToPixels(shape->m_radius);
+    float raylibRadius = metersToPixels(fixture->GetShape()->m_radius);
     DrawCircleLinesV(center, raylibRadius, YELLOW);
 }
 
@@ -61,5 +60,5 @@ bool Explosion::isOver() const {
 }
 
 float Explosion::calculateStrength() const {
-    return 1.0f / shape->m_radius;
+    return Explosion::baseStrength / fixture->GetShape()->m_radius;
 }
