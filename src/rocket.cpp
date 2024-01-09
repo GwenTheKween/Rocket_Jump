@@ -50,6 +50,10 @@ void Rocket::render() const {
     auto r2 = box2dToRaylib(pos + v2);
     auto r3 = box2dToRaylib(pos + v3);
     DrawTriangleLines(r1, r3, r2, BLUE);
+
+#ifdef DEBUG
+    DrawCircleLinesV(raylibPosition(), metersToPixels(Rocket::radius), WHITE);
+#endif
 }
 
 void Rocket::update(float deltaTime) {

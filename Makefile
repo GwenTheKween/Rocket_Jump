@@ -78,7 +78,7 @@ endif
 
 # Compile flags
 C_FLAGS = -L$(LIB_DIR) -I$(INC_DIR) $(addprefix -l,$(LIBS)) -std=c++17
-
+DEBUG_FLAGS = -g -DDEBUG=1
 
 
 #
@@ -205,7 +205,7 @@ endif
 RUN_CMD := $(RUN_CMD) $(ARGS)
 
 ifdef debug_mode
-C_FLAGS += -g
+C_FLAGS += $(DEBUG_FLAGS)
 endif
 
 all: $(OUT)
