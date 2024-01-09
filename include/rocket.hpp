@@ -12,7 +12,7 @@ public:
 
     // how much larger the triangle should be compared to one
     // inscribed in the hitbox
-    static constexpr float triangleToRadiusRatio = 1.2f;
+    static constexpr float triangleToRadiusRatio = 1.5f;
     static constexpr float mass = 1.0f;
     static constexpr float approxArea = radius * radius;
     static constexpr float density = mass / approxArea;
