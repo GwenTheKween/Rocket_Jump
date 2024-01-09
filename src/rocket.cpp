@@ -64,8 +64,6 @@ bool Rocket::hasExploded() const {
     return wasDestroyed;
 }
 
-Explosion *Rocket::spawnExplosion(b2Vec2 position) {
+void Rocket::collide() {
     wasDestroyed = true;
-    // TODO spawn explosion
-    return nullptr;
 }

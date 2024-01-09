@@ -3,28 +3,39 @@
 #include <array>
 #include <sstream>
 #include <iomanip>
-#include <queue>
+#include <deque>
 #include "player.hpp"
 #include "wall.hpp"
 #include "rocket.hpp"
 #include "world.hpp"
 #include "explosion.hpp"
 
-void explode(std::queue<Explosion *>& explosions, Rocket *rocket, b2Vec2 position) {
+Explosion *spawnExplosion(b2World& world, b2Vec2 position) {
+    // TODO
+    return new Explosion(world, position);
+}
+
+void explode(b2World& world, std::deque<Explosion *>& explosions, Rocket *rocket, b2Vec2 position) {
     // if it explodes in the air, spawn explosion at its center
-    auto explosion = rocket->spawnExplosion(position);
-    explosions.push(explosion);
+    auto explosion = spawnExplosion(world, position);
+    explosions.push_back(explosion);
+    rocket->collide();
     // DO NOT DELETE ROCKET
     // this is done in the cleanup stage of spawning explosions
 }
 
 class ContactListener: public b2ContactListener {
-    std::queue<Explosion *>& explosions;
+    b2World& world;
+    std::deque<Explosion *>& explosions;
     Rocket *explodingRocket;
-    bool shouldPopExplosion;
+    bool shouldCreateExplosion;
     b2Vec2 explosionLocation;
 public:
-    ContactListener(std::queue<Explosion *>& explosions): explosions(explosions), shouldPopExplosion(false) {}
+    ContactListener(b2World& world, std::deque<Explosion *>& explosions):
+        explosions(explosions),
+        shouldCreateExplosion(false),
+        world(world) {}
+
     void BeginContact(b2Contact *contact) {
         using Type = Entity::EntityType;
         Entity *a = Entity::fromFixture(contact->GetFixtureA());
@@ -35,25 +46,29 @@ public:
         }
 
         if (a->type == Type::ROCKET && b->type == Type::TERRAIN) {
+            // set variables to create explosion later in the frame
+
             b2WorldManifold manifold;
             contact->GetWorldManifold(&manifold);
-            shouldPopExplosion = true;
-            explodingRocket = dynamic_cast<Rocket *>(a);
 
             // always spawns explosions in the first contact point
             // maybe fix this later, but it probably doesn't matter
-            explosionLocation = manifold.points[0];
-
+            setupForExplosion(dynamic_cast<Rocket *>(a), manifold.points[0]);
         }
     }
 
-    void EndContact(b2Contact *contact) {
+    void EndContact(b2Contact *contact) {}
+
+    void setupForExplosion(Rocket *rocket, b2Vec2 position) {
+        shouldCreateExplosion = true;
+        explodingRocket = rocket;
+        explosionLocation = position;
     }
 
-    void doExplodeIfNeeded() {
-        if (shouldPopExplosion) {
-            explode(explosions, explodingRocket, explosionLocation);
-            shouldPopExplosion = false;
+    void processQueuedExplosionIfAny() {
+        if (shouldCreateExplosion) {
+            explode(world, explosions, explodingRocket, explosionLocation);
+            shouldCreateExplosion = false;
         }
     }
 };
@@ -80,9 +95,9 @@ int main(int argc, char *argv[]) {
     auto wall = Wall(world, b2Vec2{-10, 10}, b2Vec2{20, 5});
     std::array<Rocket *, Player::maxRockets> rockets;
     int rocketIndex = 0;
-    std::queue<Explosion *> explosions;
+    std::deque<Explosion *> explosions;
 
-    ContactListener cl(explosions);
+    ContactListener cl(world, explosions);
     world.SetContactListener(&cl);
 
     Camera2D camera;
@@ -94,22 +109,31 @@ int main(int argc, char *argv[]) {
         timeSlice += GetFrameTime();
         if (timeSlice >= SIMULATION_STEP_INTERVAL) {
             world.Step(SIMULATION_STEP_INTERVAL, SIMULATION_VELOCITY_ITER, SIMULATION_POSITION_ITER);
+            // process explosions first to allow frame-1-explosion interactions to happen
+            for (Explosion *explosion: explosions) {
+                explosion->update(SIMULATION_STEP_INTERVAL);
+            }
+            while (explosions.size() > 0 && explosions.front()->isOver()) {
+                auto endedExplosion = explosions.front();
+                explosions.pop_front();
+                delete endedExplosion;
+            }
+
             player.update(SIMULATION_STEP_INTERVAL);
             for (Rocket *rocket: rockets) {
                 if (rocket != nullptr) {
                     rocket->update(SIMULATION_STEP_INTERVAL);
                     if (rocket->shouldExplodeByAge())
-                        explode(explosions, rocket, rocket->box2dPosition());
+                        explode(world, explosions, rocket, rocket->box2dPosition());
                 }
             }
-            cl.doExplodeIfNeeded();
+            cl.processQueuedExplosionIfAny();
             for (Rocket *&rocketRef: rockets) {
                 if (rocketRef != nullptr && rocketRef->hasExploded()) {
                     delete rocketRef;
                     rocketRef = nullptr;
                 }
             }
-            // TODO explosions.update(SIMULATION_STEP_INTERVAL);
             timeSlice -= SIMULATION_STEP_INTERVAL;
         }
 
@@ -136,7 +160,9 @@ int main(int argc, char *argv[]) {
                     if (rocket != nullptr)
                         rocket->render();
                 }
-                // rocket.render();
+                for (const Explosion *explosion: explosions) {
+                    explosion->render();
+                }
             EndMode2D();
 
             write(player.getAmmo(), 0, 0, 32, WHITE);

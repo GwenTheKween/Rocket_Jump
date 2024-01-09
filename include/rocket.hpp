@@ -26,5 +26,5 @@ public:
     void update(float deltaTime);
     bool shouldExplodeByAge() const;
     bool hasExploded() const;
-    Explosion *spawnExplosion(b2Vec2 position);
+    void collide();
 };
