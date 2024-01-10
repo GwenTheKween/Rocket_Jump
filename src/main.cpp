@@ -33,14 +33,15 @@ b2Vec2 getMousePositionInWorld(Camera2D& camera) {
 class ContactListener: public b2ContactListener {
     b2World& world;
     std::deque<Explosion *>& explosions;
-    Rocket *explodingRocket;
-    bool shouldCreateExplosion;
+    Rocket *explodingRocket = nullptr;
+    bool shouldCreateExplosion = false;
     b2Vec2 explosionLocation;
 public:
     ContactListener(b2World& world, std::deque<Explosion *>& explosions):
+        world(world),
         explosions(explosions),
-        shouldCreateExplosion(false),
-        world(world) {}
+        shouldCreateExplosion(false)
+        {}
 
     void BeginContact(b2Contact *contact) {
         using Type = Entity::EntityType;
@@ -69,14 +70,19 @@ public:
 
         if (a->type == Type::EXPLOSION) {
             switch (b->type) {
+                Rocket *r;
                 case Type::PLAYER:
                     dynamic_cast<Player *>(b)->feelExplosion(*dynamic_cast<Explosion *>(a));
                     break;
                 case Type::ROCKET:
-                    auto r = dynamic_cast<Rocket *>(b);
+                    r = dynamic_cast<Rocket *>(b);
                     setupForExplosion(r, r->box2dPosition());
                     break;
-                // TODO case Type::DESTRUCTIBLE_TERRAIN
+                case Type::EXPLOSION:
+                    break;
+                case Type::TERRAIN:
+                    // TODO
+                    break;
             }
             return;
         }

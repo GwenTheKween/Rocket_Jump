@@ -9,9 +9,9 @@
 
 class Entity {
 protected:
+    std::reference_wrapper<b2World> world;
     b2Body *body;
     b2Fixture *fixture;
-    std::reference_wrapper<b2World> world;
 
     void swap(Entity& other);
 
@@ -39,7 +39,7 @@ public:
     Entity& operator=(Entity&& p);
     Entity& operator=(const Entity& p) = delete;
 
-    ~Entity();
+    virtual ~Entity();
 
     virtual void update(float deltaTime) = 0;
     b2Vec2 box2dPosition() const;
