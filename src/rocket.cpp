@@ -64,7 +64,7 @@ void Rocket::update(float deltaTime) {
 }
 
 bool Rocket::shouldExplodeByAge() const {
-    return remainingTime <= 0;
+    return !hasExploded() && remainingTime <= 0;
 }
 
 bool Rocket::hasExploded() const {
