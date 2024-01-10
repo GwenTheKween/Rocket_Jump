@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 #include "entity.hpp"
 #include "explosion.hpp"
 
@@ -7,6 +9,8 @@ class Rocket: public Entity {
     b2Vec2 direction;
     float remainingTime;
     bool wasDestroyed;
+
+    std::array<b2Vec2, 3> localCoordsVertices;
 public:
     static constexpr float radius = 0.5f;
 

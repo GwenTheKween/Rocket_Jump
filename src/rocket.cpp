@@ -30,25 +30,28 @@ Rocket::Rocket(b2World& world, b2Vec2 position, b2Vec2 direction)
     wasDestroyed(false) {
 
     this->direction.Normalize();
-}
 
-void Rocket::render() const {
     static const float halfRoot3 = 0.5f * sqrt(3);
 
     // head
     auto v1 = Rocket::triangleToRadiusRatio * Rocket::radius * direction;
     // head rotated by 60 degrees
-    b2Vec2 v2{
+    auto v2 = b2Vec2 {
         -0.5f*v1.x - halfRoot3*v1.y,
         halfRoot3*v1.x  - 0.5f*v1.y
     };
     // last vertex
     auto v3 = -(v1 + v2);
+    localCoordsVertices.at(0) = v1;
+    localCoordsVertices.at(1) = v2;
+    localCoordsVertices.at(2) = v3;
+}
 
+void Rocket::render() const {
     auto pos = box2dPosition();
-    auto r1 = box2dToRaylib(pos + v1);
-    auto r2 = box2dToRaylib(pos + v2);
-    auto r3 = box2dToRaylib(pos + v3);
+    auto r1 = box2dToRaylib(pos + localCoordsVertices.at(0));
+    auto r2 = box2dToRaylib(pos + localCoordsVertices.at(1));
+    auto r3 = box2dToRaylib(pos + localCoordsVertices.at(2));
     DrawTriangleLines(r1, r3, r2, BLUE);
 
 #ifdef DEBUG
