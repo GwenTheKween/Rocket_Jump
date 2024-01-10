@@ -6,8 +6,7 @@ class Explosion: public Entity {
     float timeAliveRatio;
 
 public:
-    // static constexpr float radiusIncreasePerSecond = 3;
-    static constexpr float lifetime = 0.5f;
+    static constexpr float lifetime = 1.0f;
     static constexpr float initialRadius = 1.0f;
     static constexpr float maxRadius = 4.0f;
     static constexpr float baseStrength = 4000.0f;

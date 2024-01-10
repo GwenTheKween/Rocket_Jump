@@ -21,7 +21,7 @@ public:
     static constexpr float approxArea = radius * radius;
     static constexpr float density = mass / approxArea;
     static constexpr float speed = 30.0f;
-    static constexpr float lifetime = 0.5f;
+    static constexpr float lifetime = 0.3f;
 
     // direction will be normalized internally, can accept any non-null vector
     Rocket(b2World& world, b2Vec2 position, b2Vec2 direction);
