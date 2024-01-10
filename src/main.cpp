@@ -19,7 +19,6 @@ void explode(b2World& world, std::deque<Explosion *>& explosions, Rocket *rocket
     // if it explodes in the air, spawn explosion at its center
     auto explosion = spawnExplosion(world, position);
     explosions.push_back(explosion);
-    rocket->collide();
     // DO NOT DELETE ROCKET
     // this is done in the cleanup stage of spawning explosions
 }
@@ -91,6 +90,8 @@ public:
     void EndContact(b2Contact *contact) {}
 
     void setupForExplosion(Rocket *rocket, b2Vec2 position) {
+        if (rocket->hasExploded()) return;
+        rocket->collide();
         shouldCreateExplosion = true;
         explodingRocket = rocket;
         explosionLocation = position;
