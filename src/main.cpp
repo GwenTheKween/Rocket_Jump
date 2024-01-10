@@ -11,7 +11,6 @@
 #include "explosion.hpp"
 
 Explosion *spawnExplosion(b2World& world, b2Vec2 position) {
-    // TODO
     return new Explosion(world, position);
 }
 
@@ -122,53 +121,62 @@ int main(int argc, char *argv[]) {
     Camera2D camera;
     camera.zoom = 2.0f;
     camera.offset = { screenWidth/2, screenHeight/2 };
-    std::stringstream buf;
+
+    auto updateExplosions = [&]() {
+        for (Explosion *explosion: explosions)
+            explosion->update(SIMULATION_STEP_INTERVAL);
+        while (explosions.size() > 0 && explosions.front()->isOver()) {
+            auto endedExplosion = explosions.front();
+            explosions.pop_front();
+            delete endedExplosion;
+        }
+    };
+
+    auto updateRockets = [&]() {
+        for (Rocket *rocket: rockets) {
+            if (rocket != nullptr) {
+                rocket->update(SIMULATION_STEP_INTERVAL);
+                if (rocket->shouldExplodeByAge())
+                    explode(world, explosions, rocket, rocket->box2dPosition());
+            }
+        }
+        cl.processQueuedExplosionIfAny();
+        for (Rocket *&rocketRef: rockets) {
+            if (rocketRef != nullptr && rocketRef->hasExploded()) {
+                delete rocketRef;
+                rocketRef = nullptr;
+            }
+        }
+    };
+
+    auto handleInputs = [&]() {
+        std::optional<b2Vec2> mousePosInWorld = std::nullopt;
+        if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT)) {
+            mousePosInWorld = getMousePositionInWorld(camera);
+            Rocket *newRocket = player.shootRocketTowards(mousePosInWorld.value());
+            if (newRocket != nullptr) {
+                rockets.at(rocketIndex) = newRocket;
+                rocketIndex = (rocketIndex + 1) % 3;
+            }
+        }
+    };
 
     while (!WindowShouldClose()) {
         timeSlice += GetFrameTime();
         if (timeSlice >= SIMULATION_STEP_INTERVAL) {
             world.Step(SIMULATION_STEP_INTERVAL, SIMULATION_VELOCITY_ITER, SIMULATION_POSITION_ITER);
             // process explosions first to allow frame-1-explosion interactions to happen
-            for (Explosion *explosion: explosions) {
-                explosion->update(SIMULATION_STEP_INTERVAL);
-            }
-            while (explosions.size() > 0 && explosions.front()->isOver()) {
-                auto endedExplosion = explosions.front();
-                explosions.pop_front();
-                delete endedExplosion;
-            }
-
+            updateExplosions();
             player.update(SIMULATION_STEP_INTERVAL);
-            for (Rocket *rocket: rockets) {
-                if (rocket != nullptr) {
-                    rocket->update(SIMULATION_STEP_INTERVAL);
-                    if (rocket->shouldExplodeByAge())
-                        explode(world, explosions, rocket, rocket->box2dPosition());
-                }
-            }
-            cl.processQueuedExplosionIfAny();
-            for (Rocket *&rocketRef: rockets) {
-                if (rocketRef != nullptr && rocketRef->hasExploded()) {
-                    delete rocketRef;
-                    rocketRef = nullptr;
-                }
-            }
+            updateRockets();
+
             timeSlice -= SIMULATION_STEP_INTERVAL;
         }
 
         // TODO more refined camera movement
         // camera.target = player.raylibPosition();
 
-        if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT)) {
-            Vector2 mousePositionScreen = GetMousePosition();
-            Vector2 mousePositionCamera = GetScreenToWorld2D(mousePositionScreen, camera);
-            b2Vec2 mousePositionWorld = raylibToBox2d(mousePositionCamera);
-            Rocket *newRocket = player.shootRocketTowards(mousePositionWorld);
-            if (newRocket != nullptr) {
-                rockets.at(rocketIndex) = newRocket;
-                rocketIndex = (rocketIndex + 1) % 3;
-            }
-        }
+        handleInputs();
 
         BeginDrawing();
             ClearBackground(BLACK);
