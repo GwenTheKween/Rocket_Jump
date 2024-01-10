@@ -62,16 +62,18 @@ public:
         }
 
         if (a->type == Type::EXPLOSION) {
-            if (b->type == Type::PLAYER) {
-                dynamic_cast<Player *>(b)->feelExplosion(*dynamic_cast<Explosion *>(a));
-                return;
-            } else if (b->type == Type::ROCKET) {
-                auto r = dynamic_cast<Rocket *>(b);
-                setupForExplosion(r, r->box2dPosition());
+            switch (b->type) {
+                case Type::PLAYER:
+                    dynamic_cast<Player *>(b)->feelExplosion(*dynamic_cast<Explosion *>(a));
+                    break;
+                case Type::ROCKET:
+                    auto r = dynamic_cast<Rocket *>(b);
+                    setupForExplosion(r, r->box2dPosition());
+                    break;
+                // TODO case Type::DESTRUCTIBLE_TERRAIN
             }
+            return;
         }
-
-        // TODO explosion - destructible terrain collision
     }
 
     void EndContact(b2Contact *contact) {}
