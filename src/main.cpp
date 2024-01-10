@@ -100,15 +100,15 @@ void write(const T& what, int x, int y, float fontSize, Color color) {
 }
 
 int main(int argc, char *argv[]) {
-    const int screenWidth = 800;
-    const int screenHeight = 450;
+    const int screenWidth = 1600;
+    const int screenHeight = 900;
 
     InitWindow(screenWidth, screenHeight, "Rocket Jump!");
     SetTargetFPS(60);
 
     float timeSlice = 0;
 
-    b2World world({0.0f, 10.0f});
+    b2World world({0.0f, 20.0f});
 
     auto player = Player(world, b2Vec2{0, 0});
     auto wall = Wall(world, b2Vec2{-10, 10}, b2Vec2{20, 5});
