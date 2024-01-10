@@ -10,6 +10,9 @@
 class Player: public Entity {
 private:
     float currentReload;
+    float recoilCharge;
+    float recoilCooldown;
+    bool chargingRecoil;
     int ammo;
 public:
     // in meters
@@ -30,6 +33,7 @@ public:
 
     // TODO is this really necessary? might detract from fast gameplay
     static_assert(Player::reloadTime > Rocket::lifetime);
+    // TODO fix long interactions between player and explosions
 
     Player(b2World& world, b2Vec2 position);
     void update(float deltaTime);
@@ -37,5 +41,7 @@ public:
     int getAmmo() const;
     float getReload() const;
     Rocket *shootRocketTowards(b2Vec2 target);
+    void startChargingRecoil();
+    void recoilFrom(b2Vec2 origin);
     void feelExplosion(const Explosion& explosion);
 };

@@ -124,6 +124,15 @@ Rocket *Player::shootRocketTowards(b2Vec2 target) {
     return new Rocket(world, pos, direction);
 }
 
+void Player::startChargingRecoil() {
+    chargingRecoil = true;
+}
+
+void Player::recoilFrom(b2Vec2 origin) {
+    chargingRecoil = false;
+    recoilCharge = 0.0f;
+}
+
 void Player::feelExplosion(const Explosion& explosion) {
     // this direction approximation is only valid since both the player and
     // the explosions are circles.

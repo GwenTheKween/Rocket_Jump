@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iomanip>
 #include <deque>
+#include <optional>
 #include "player.hpp"
 #include "wall.hpp"
 #include "rocket.hpp"
@@ -21,6 +22,12 @@ void explode(b2World& world, std::deque<Explosion *>& explosions, Rocket *rocket
     rocket->collide();
     // DO NOT DELETE ROCKET
     // this is done in the cleanup stage of spawning explosions
+}
+
+b2Vec2 getMousePositionInWorld(Camera2D& camera) {
+    Vector2 mousePositionScreen = GetMousePosition();
+    Vector2 mousePositionCamera = GetScreenToWorld2D(mousePositionScreen, camera);
+    return raylibToBox2d(mousePositionCamera);
 }
 
 class ContactListener: public b2ContactListener {
@@ -158,6 +165,16 @@ int main(int argc, char *argv[]) {
                 rockets.at(rocketIndex) = newRocket;
                 rocketIndex = (rocketIndex + 1) % 3;
             }
+        }
+
+        if (IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_RIGHT)) {
+            player.startChargingRecoil();
+        }
+
+        if (IsMouseButtonReleased(MouseButton::MOUSE_BUTTON_RIGHT)) {
+            if (!mousePosInWorld)
+                mousePosInWorld = getMousePositionInWorld(camera);
+            player.recoilFrom(mousePosInWorld.value());
         }
     };
 
