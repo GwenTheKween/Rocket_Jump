@@ -31,7 +31,7 @@ Rocket::Rocket(b2World& world, b2Vec2 position, b2Vec2 direction)
 
     this->direction.Normalize();
 
-    static const float halfRoot3 = 0.5f * sqrt(3);
+    static const float halfRoot3 = 0.5f * sqrtf(3.0f);
 
     // head
     auto v1 = Rocket::triangleToRadiusRatio * Rocket::radius * direction;
