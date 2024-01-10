@@ -54,7 +54,8 @@ Entity::Entity(
         collisionMask
     )),
     type(type) {
-    delete shape;
+    if (shape != fixture->GetShape())
+        delete shape;
 }
 
 Entity::Entity(Entity&& e): world(e.world), type(e.type) {
