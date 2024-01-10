@@ -6,10 +6,21 @@
 
 #include "world.hpp"
 
+// in meters
+constexpr float radius = 1.0f;
+constexpr float mass = 1.0f;
+constexpr float approxArea = radius * radius;
+constexpr float density = mass / approxArea;
+constexpr float ammoCountMarginBottom = 0.1f;
+constexpr float ammoCountTriangleRadius = 0.4f;
+constexpr float ammoCountFilledDotRadius = 0.2f;
+constexpr float ammoCountEmptyDotRadius = 0.1f;
+constexpr int ammoCountSegments = 20;
+
 constexpr float pi = static_cast<float>(std::numbers::pi);
 
 struct PlayerAmmoDotPositions {
-    std::array<b2Vec2, Player::maxRockets> points;
+    std::array<b2Vec2, Player::maxRockets> dots;
     PlayerAmmoDotPositions() {
         using namespace std::complex_literals;
         constexpr std::complex<float> anglePerDot = (2.0if * pi) / static_cast<float>(Player::maxRockets);
@@ -17,14 +28,14 @@ struct PlayerAmmoDotPositions {
         // up is negative y
         auto dotsCenter = -std::complex<float>(
             0.0f,
-            Player::radius + Player::ammoCountMarginBottom + Player::ammoCountTriangleRadius
+            radius + ammoCountMarginBottom + ammoCountTriangleRadius
         );
 
         for (int i = 0; i < Player::maxRockets; i++) {
             auto complexAngle = pi * -0.5if + static_cast<float>(i) * anglePerDot;
             auto direction = std::exp(complexAngle);
-            auto complexPoint = dotsCenter + direction * Player::ammoCountTriangleRadius;
-            points.at(i) = b2Vec2(complexPoint.real(), complexPoint.imag());
+            auto complexPoint = dotsCenter + direction * ammoCountTriangleRadius;
+            dots.at(i) = b2Vec2(complexPoint.real(), complexPoint.imag());
         }
     }
 };
@@ -38,14 +49,14 @@ b2Body *constructPlayerBody(b2World& world, b2Vec2 spawnPosition) {
 
 b2Shape *constructPlayerShape() {
     b2CircleShape *shape = new b2CircleShape();
-    shape->m_radius = Player::radius;
+    shape->m_radius = radius;
     return shape;
 }
 
 b2Fixture *constructPlayerFixture(b2Body *body, b2Shape *shape) {
     b2FixtureDef fixtureDef;
     fixtureDef.shape = shape;
-    fixtureDef.density = Player::density;
+    fixtureDef.density = density;
     return body->CreateFixture(&fixtureDef);
 }
 
@@ -54,55 +65,55 @@ Player::Player(b2World& world, b2Vec2 position):
         world,
         constructPlayerBody(world, position),
         constructPlayerShape(),
-        Player::density,
+        density,
         EntityType::PLAYER,
         EntityType::TERRAIN | EntityType::EXPLOSION
     ) {}
 
 void drawAmmoDot(b2Vec2 worldPos, float reload) {
-    float filledSectorAngle = -90 + (1 - (reload / Player::reloadTime)) * 360;
+    float filledSectorAngle = -90 + (1 - (reload / Player::rocketReloadTime)) * 360;
     Vector2 pos = box2dToRaylib(worldPos);
-    DrawCircleV(pos, metersToPixels(Player::ammoCountEmptyDotRadius), GRAY);
+    DrawCircleV(pos, metersToPixels(ammoCountEmptyDotRadius), GRAY);
     DrawCircleSector(
         pos,
-        metersToPixels(Player::ammoCountFilledDotRadius),
+        metersToPixels(ammoCountFilledDotRadius),
         -90,
         filledSectorAngle,
-        Player::ammoCountSegments,
+        ammoCountSegments,
         WHITE
     );
 }
 
 void Player::render() const {
     auto rlPos = raylibPosition();
-    DrawCircleV(rlPos, metersToPixels(Player::radius), RED);
+    DrawCircleV(rlPos, metersToPixels(radius), RED);
     b2Vec2 position = box2dPosition();
 
-    for (int i = 0; i < Player::maxRockets; i++) {
-        auto dotRelativePosition = playerAmmoDotPositions.points.at(i);
+    for (int i = 0; i < maxRockets; i++) {
+        auto dotRelativePosition = playerAmmoDotPositions.dots.at(i);
         float reloadAmount;
         if (i < ammo) {
             reloadAmount = 0.0f;
         } else if (i == ammo) {
             reloadAmount = currentReload;
         } else {
-            reloadAmount = Player::reloadTime;
+            reloadAmount = rocketReloadTime;
         }
         drawAmmoDot(position + dotRelativePosition, reloadAmount);
     }
 }
 
 void Player::update(float deltaTime) {
-    if (ammo >= Player::maxRockets) {
+    if (ammo >= maxRockets) {
         // keep reload progress frozen while at full ammo
-        currentReload = Player::reloadTime;
+        currentReload = rocketReloadTime;
         return;
     }
 
     currentReload -= deltaTime;
     if (currentReload <= 0) {
         ammo++;
-        currentReload = Player::reloadTime;
+        currentReload = rocketReloadTime;
     }
 }
 
