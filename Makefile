@@ -77,7 +77,7 @@ endif
 
 
 # Compile flags
-C_FLAGS = -L$(LIB_DIR) -I$(INC_DIR) $(addprefix -l,$(LIBS)) -std=c++17
+C_FLAGS = -L$(LIB_DIR) -I$(INC_DIR) $(addprefix -l,$(LIBS)) -std=c++20
 DEBUG_FLAGS = -g -DDEBUG=1
 
 

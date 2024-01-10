@@ -175,8 +175,10 @@ int main(int argc, char *argv[]) {
                 wall.render();
             EndMode2D();
 
+#ifdef DEBUG
             write(player.getAmmo(), 0, 0, 32, WHITE);
             write(player.getReload(), 0, 32, 32, WHITE);
+#endif
         EndDrawing();
     }
 

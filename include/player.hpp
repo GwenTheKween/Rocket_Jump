@@ -19,6 +19,11 @@ public:
     static constexpr float density = mass / approxArea;
     static constexpr float reloadTime = 2.0f;
     static constexpr int maxRockets = 3;
+    static constexpr float ammoCountMarginBottom = 0.1f;
+    static constexpr float ammoCountTriangleRadius = 0.4f;
+    static constexpr float ammoCountFilledDotRadius = 0.2f;
+    static constexpr float ammoCountEmptyDotRadius = 0.1f;
+    static constexpr int ammoCountSegments = 20;
 
     // TODO is this really necessary? might detract from fast gameplay
     static_assert(Player::reloadTime > Rocket::lifetime);
