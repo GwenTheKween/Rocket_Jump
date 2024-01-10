@@ -4,6 +4,12 @@
 
 #include "world.hpp"
 
+constexpr float lifetime = 1.0f;
+constexpr float initialRadius = 1.0f;
+constexpr float maxRadius = 4.0f;
+constexpr float baseStrength = 4000.0f;
+
+
 float clamp01(float t) {
     if (t < 0) return 0;
     if (t > 1) return 1;
@@ -24,7 +30,7 @@ b2Body *constructExplosionBody(b2World& world, b2Vec2 position) {
 
 b2Shape *constructExplosionShape() {
     b2CircleShape *shape = new b2CircleShape();
-    shape->m_radius = Explosion::initialRadius;
+    shape->m_radius = initialRadius;
     return shape;
 }
 
@@ -40,9 +46,9 @@ Explosion::Explosion(b2World& world, b2Vec2 position):
     timeAliveRatio(0) {}
 
 void Explosion::update(float deltaTime) {
-    timeAliveRatio += deltaTime / Explosion::lifetime;
+    timeAliveRatio += deltaTime / lifetime;
     float easedExpansionTime = explosionExpansionEasing(timeAliveRatio);
-    fixture->GetShape()->m_radius = std::lerp(Explosion::initialRadius, Explosion::maxRadius, easedExpansionTime);
+    fixture->GetShape()->m_radius = std::lerp(initialRadius, maxRadius, easedExpansionTime);
 }
 
 void Explosion::render() const {
@@ -56,5 +62,5 @@ bool Explosion::isOver() const {
 }
 
 float Explosion::calculateStrength() const {
-    return Explosion::baseStrength / fixture->GetShape()->m_radius;
+    return baseStrength / fixture->GetShape()->m_radius;
 }

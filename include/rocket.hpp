@@ -12,15 +12,6 @@ class Rocket: public Entity {
 
     std::array<b2Vec2, 3> localCoordsVertices;
 public:
-    static constexpr float radius = 0.5f;
-
-    // how much larger the triangle should be compared to one
-    // inscribed in the hitbox
-    static constexpr float triangleToRadiusRatio = 1.5f;
-    static constexpr float mass = 1.0f;
-    static constexpr float approxArea = radius * radius;
-    static constexpr float density = mass / approxArea;
-    static constexpr float speed = 30.0f;
     static constexpr float lifetime = 0.3f;
     // TODO should rockets inherit velocity from player?
 

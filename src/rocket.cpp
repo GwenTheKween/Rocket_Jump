@@ -1,18 +1,28 @@
 #include "rocket.hpp"
 #include "world.hpp"
 
+constexpr float radius = 0.5f;
+
+// how much larger the triangle should be compared to one
+// inscribed in the hitbox
+constexpr float triangleToRadiusRatio = 1.5f;
+constexpr float mass = 1.0f;
+constexpr float approxArea = radius * radius;
+constexpr float density = mass / approxArea;
+constexpr float speed = 30.0f;
+
 b2Body *constructRocketBody(b2World& world, b2Vec2 position, b2Vec2 direction) {
     b2BodyDef bodyDef = Entity::defaultBodyDef();
     bodyDef.position = position;
     bodyDef.gravityScale = 0;
     direction.Normalize();
-    bodyDef.linearVelocity = Rocket::speed * direction;
+    bodyDef.linearVelocity = speed * direction;
     return world.CreateBody(&bodyDef);
 }
 
 b2Shape *constructRocketShape() {
     b2CircleShape *shape = new b2CircleShape();
-    shape->m_radius = Rocket::radius;
+    shape->m_radius = radius;
     return shape;
 }
 
@@ -21,12 +31,12 @@ Rocket::Rocket(b2World& world, b2Vec2 position, b2Vec2 direction)
         world,
         constructRocketBody(world, position, direction),
         constructRocketShape(),
-        Rocket::density,
+        density,
         Entity::EntityType::ROCKET,
         Entity::EntityType::TERRAIN | Entity::EntityType::EXPLOSION
     ),
     direction(direction),
-    remainingTime(Rocket::lifetime),
+    remainingTime(lifetime),
     wasDestroyed(false) {
 
     this->direction.Normalize();
@@ -34,7 +44,7 @@ Rocket::Rocket(b2World& world, b2Vec2 position, b2Vec2 direction)
     static const float halfRoot3 = 0.5f * sqrtf(3.0f);
 
     // head
-    auto v1 = Rocket::triangleToRadiusRatio * Rocket::radius * direction;
+    auto v1 = triangleToRadiusRatio * radius * direction;
     // head rotated by 60 degrees
     auto v2 = b2Vec2 {
         -0.5f*v1.x - halfRoot3*v1.y,
@@ -55,7 +65,7 @@ void Rocket::render() const {
     DrawTriangleLines(r1, r3, r2, BLUE);
 
 #ifdef DEBUG
-    DrawCircleLinesV(raylibPosition(), metersToPixels(Rocket::radius), WHITE);
+    DrawCircleLinesV(raylibPosition(), metersToPixels(radius), WHITE);
 #endif
 }
 

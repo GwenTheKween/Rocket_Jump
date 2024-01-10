@@ -4,6 +4,8 @@
 
 #include "world.hpp"
 
+constexpr float density = 1.0f;
+
 b2Body *constructWallBody(b2World& world, b2Vec2 position) {
     b2BodyDef bodyDef = Entity::defaultBodyDef();
     bodyDef.position = std::move(position);
@@ -28,7 +30,7 @@ Wall::Wall(b2World& world, b2Vec2 position, b2Vec2 dimensions)
         world,
         constructWallBody(world, position),
         constructWallShape(dimensions),
-        Wall::density,
+        density,
         EntityType::TERRAIN,
         EntityType::PLAYER | EntityType::ROCKET
     ),
