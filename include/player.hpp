@@ -25,6 +25,9 @@ public:
     static constexpr float ammoCountEmptyDotRadius = 0.1f;
     static constexpr int ammoCountSegments = 20;
 
+    // TODO secondary shot with (maybe) chargeable effect
+    // TODO draw rocket count UI in a fixed position on the screen
+
     // TODO is this really necessary? might detract from fast gameplay
     static_assert(Player::reloadTime > Rocket::lifetime);
 
