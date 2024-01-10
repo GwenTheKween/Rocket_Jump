@@ -8,6 +8,28 @@
 
 constexpr float pi = static_cast<float>(std::numbers::pi);
 
+struct PlayerAmmoDotPositions {
+    std::array<b2Vec2, Player::maxRockets> points;
+    PlayerAmmoDotPositions() {
+        using namespace std::complex_literals;
+        constexpr std::complex<float> anglePerDot = (2.0if * pi) / static_cast<float>(Player::maxRockets);
+
+        // up is negative y
+        auto dotsCenter = -std::complex<float>(
+            0.0f,
+            Player::radius + Player::ammoCountMarginBottom + Player::ammoCountTriangleRadius
+        );
+
+        for (int i = 0; i < Player::maxRockets; i++) {
+            auto complexAngle = pi * -0.5if + static_cast<float>(i) * anglePerDot;
+            auto direction = std::exp(complexAngle);
+            auto complexPoint = dotsCenter + direction * Player::ammoCountTriangleRadius;
+            points.at(i) = b2Vec2(complexPoint.real(), complexPoint.imag());
+        }
+    }
+};
+const static PlayerAmmoDotPositions playerAmmoDotPositions;
+
 b2Body *constructPlayerBody(b2World& world, b2Vec2 spawnPosition) {
     b2BodyDef bodyDef = Entity::defaultBodyDef();
     bodyDef.position = std::move(spawnPosition);
@@ -38,13 +60,13 @@ Player::Player(b2World& world, b2Vec2 position):
     ) {}
 
 void drawAmmoDot(b2Vec2 worldPos, float reload) {
-    float filledSectorAngle = (1 - (reload / Player::reloadTime)) * 360;
+    float filledSectorAngle = -90 + (1 - (reload / Player::reloadTime)) * 360;
     Vector2 pos = box2dToRaylib(worldPos);
     DrawCircleV(pos, metersToPixels(Player::ammoCountEmptyDotRadius), GRAY);
     DrawCircleSector(
         pos,
         metersToPixels(Player::ammoCountFilledDotRadius),
-        0,
+        -90,
         filledSectorAngle,
         Player::ammoCountSegments,
         WHITE
@@ -52,22 +74,12 @@ void drawAmmoDot(b2Vec2 worldPos, float reload) {
 }
 
 void Player::render() const {
-    using namespace std::complex_literals;
-    constexpr std::complex<float> anglePerDot = (2.0if * pi) / static_cast<float>(Player::maxRockets);
-    static const float halfRoot3 = 0.5f * sqrtf(3.0f);
     auto rlPos = raylibPosition();
     DrawCircleV(rlPos, metersToPixels(Player::radius), RED);
     b2Vec2 position = box2dPosition();
-    std::complex<float> dotsCenter(position.x, position.y);
-
-    // up is negative y
-    dotsCenter -= std::complex<float>(0.0f, Player::radius + Player::ammoCountMarginBottom + Player::ammoCountTriangleRadius);
 
     for (int i = 0; i < Player::maxRockets; i++) {
-        auto complexAngle = pi * -0.5if + static_cast<float>(i) * anglePerDot;
-        auto direction = std::exp(complexAngle);
-        std::complex<float> currentDotCenter = dotsCenter + direction * Player::ammoCountTriangleRadius;
-        b2Vec2 dotWorldPosition(currentDotCenter.real(), currentDotCenter.imag());
+        auto dotRelativePosition = playerAmmoDotPositions.points.at(i);
         float reloadAmount;
         if (i < ammo) {
             reloadAmount = 0.0f;
@@ -76,7 +88,7 @@ void Player::render() const {
         } else {
             reloadAmount = Player::reloadTime;
         }
-        drawAmmoDot(dotWorldPosition, reloadAmount);
+        drawAmmoDot(position + dotRelativePosition, reloadAmount);
     }
 }
 
