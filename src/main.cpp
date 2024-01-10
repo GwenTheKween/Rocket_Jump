@@ -61,9 +61,16 @@ public:
             std::swap(a, b);
         }
 
-        if (a->type == Type::EXPLOSION && b->type == Type::PLAYER) {
-            dynamic_cast<Player *>(b)->feelExplosion(*dynamic_cast<Explosion *>(a));
+        if (a->type == Type::EXPLOSION) {
+            if (b->type == Type::PLAYER) {
+                dynamic_cast<Player *>(b)->feelExplosion(*dynamic_cast<Explosion *>(a));
+                return;
+            } else if (b->type == Type::ROCKET) {
+                auto r = dynamic_cast<Rocket *>(b);
+                setupForExplosion(r, r->box2dPosition());
+            }
         }
+
         // TODO explosion - destructible terrain collision
     }
 

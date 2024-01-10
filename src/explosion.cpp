@@ -15,10 +15,6 @@ float explosionExpansionEasing(float t) {
     return 1 - std::pow(1 - t, 3);
 }
 
-float lerp(float a, float b, float t) {
-    return a * (1-t) + b * t;
-}
-
 b2Body *constructExplosionBody(b2World& world, b2Vec2 position) {
     b2BodyDef bodyDef = Entity::defaultBodyDef();
     bodyDef.position = position;
@@ -39,14 +35,14 @@ Explosion::Explosion(b2World& world, b2Vec2 position):
         constructExplosionShape(),
         1,
         Entity::EntityType::EXPLOSION,
-        Entity::EntityType::PLAYER
+        Entity::EntityType::PLAYER | Entity::EntityType::ROCKET
     ),
     timeAliveRatio(0) {}
 
 void Explosion::update(float deltaTime) {
     timeAliveRatio += deltaTime / Explosion::lifetime;
     float easedExpansionTime = explosionExpansionEasing(timeAliveRatio);
-    fixture->GetShape()->m_radius = lerp(Explosion::initialRadius, Explosion::maxRadius, easedExpansionTime);
+    fixture->GetShape()->m_radius = std::lerp(Explosion::initialRadius, Explosion::maxRadius, easedExpansionTime);
 }
 
 void Explosion::render() const {

@@ -23,7 +23,7 @@ Rocket::Rocket(b2World& world, b2Vec2 position, b2Vec2 direction)
         constructRocketShape(),
         Rocket::density,
         Entity::EntityType::ROCKET,
-        Entity::EntityType::TERRAIN
+        Entity::EntityType::TERRAIN | Entity::EntityType::EXPLOSION
     ),
     direction(direction),
     remainingTime(Rocket::lifetime),
