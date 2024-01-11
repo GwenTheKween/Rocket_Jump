@@ -217,8 +217,8 @@ int main(int argc, char *argv[]) {
             EndMode2D();
 
 #ifdef DEBUG
-            write(player.getAmmo(), 0, 0, 32, WHITE);
-            write(player.getReload(), 0, 32, 32, WHITE);
+            write(player.getRocketAmmo(), 0, 0, 32, WHITE);
+            write(player.getRocketReload(), 0, 32, 32, WHITE);
 #endif
         EndDrawing();
     }

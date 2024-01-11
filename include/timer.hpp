@@ -7,6 +7,9 @@ class Timer {
     const float len;
     float elapsed;
     std::function<void()> action;
+    bool didAction = false;
+
+    void performAction();
 public:
     using Action = decltype(action);
 
@@ -14,9 +17,16 @@ public:
      * @brief Construct a new Timer object.
      *
      * @param length Time length of the Timer.
-     * @param autoAction Action to take automatically when timer concludes, if any.
      */
-    Timer(float length, std::optional<Action> autoAction=std::nullopt);
+    Timer(float length);
+
+    /**
+     * @brief Construct a new Timer object with an action that is performed automatically when concluded.
+     *
+     * @param length Time length of the Timer.
+     * @param autoAction Action to take automatically when timer concludes.
+     */
+    Timer(float length, Action autoAction);
 
     /**
      * @brief Checks whether or not the timer has finished.
@@ -27,9 +37,22 @@ public:
     bool done();
 
     /**
-     * @brief Reset progress to 0.
+     * @brief Resets progress to 0.
      */
     void reset();
+
+    /**
+     * @brief Triggers the action again if done.
+     *
+     * @return true If the function was called.
+     * @return false If it was not.
+     */
+    bool triggerActionAgainIfDone();
+
+    /**
+     * @brief Set the state such that done() will return true.
+     */
+    void setToComplete();
 
     /**
      * @brief Checks the full length of the Timer.
