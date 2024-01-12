@@ -5,6 +5,8 @@
 #include <iomanip>
 #include <deque>
 #include <optional>
+#include <set>
+
 #include "player.hpp"
 #include "wall.hpp"
 #include "rocket.hpp"
@@ -32,15 +34,20 @@ b2Vec2 getMousePositionInWorld(Camera2D& camera) {
 class ContactListener: public b2ContactListener {
     b2World& world;
     std::deque<Explosion *>& explosions;
+    std::set<uintptr_t>& explosionsWithinRangeOfPlayer;
     Rocket *explodingRocket = nullptr;
     bool shouldCreateExplosion = false;
     b2Vec2 explosionLocation;
 public:
-    ContactListener(b2World& world, std::deque<Explosion *>& explosions):
+    ContactListener(
+        b2World& world,
+        std::deque<Explosion *>& explosions,
+        std::set<uintptr_t>& explosionsWithinRangeOfPlayer
+    ):
         world(world),
         explosions(explosions),
-        shouldCreateExplosion(false)
-        {}
+        explosionsWithinRangeOfPlayer(explosionsWithinRangeOfPlayer),
+        shouldCreateExplosion(false) {}
 
     void BeginContact(b2Contact *contact) {
         using Type = Entity::EntityType;
@@ -68,26 +75,38 @@ public:
         }
 
         if (a->type == Type::EXPLOSION) {
+            Rocket *r;
             switch (b->type) {
-                Rocket *r;
-                case Type::PLAYER:
-                    dynamic_cast<Player *>(b)->feelExplosion(*dynamic_cast<Explosion *>(a));
-                    break;
-                case Type::ROCKET:
-                    r = dynamic_cast<Rocket *>(b);
-                    setupForExplosion(r, r->box2dPosition());
-                    break;
-                case Type::EXPLOSION:
-                    break;
-                case Type::TERRAIN:
-                    // TODO
-                    break;
+            case Type::PLAYER:
+                explosionsWithinRangeOfPlayer.insert(a->toUserDataPointer());
+                break;
+            case Type::ROCKET:
+                r = dynamic_cast<Rocket *>(b);
+                setupForExplosion(r, r->box2dPosition());
+                break;
+            case Type::EXPLOSION:
+                break;
+            case Type::TERRAIN:
+                // TODO destructible terrain
+                break;
             }
             return;
         }
     }
 
-    void EndContact(b2Contact *contact) {}
+    void EndContact(b2Contact *contact) {
+        using Type = Entity::EntityType;
+        Entity *a = Entity::fromFixture(contact->GetFixtureA());
+        Entity *b = Entity::fromFixture(contact->GetFixtureB());
+
+        if (b->type == Type::PLAYER) {
+            std::swap(a, b);
+        }
+
+        if (a->type == Type::PLAYER && b->type == Type::EXPLOSION) {
+            explosionsWithinRangeOfPlayer.erase(b->toUserDataPointer());
+        }
+    }
 
     void setupForExplosion(Rocket *rocket, b2Vec2 position) {
         if (rocket->hasExploded()) return;
@@ -128,8 +147,9 @@ int main(int argc, char *argv[]) {
     std::array<Rocket *, Player::maxRockets> rockets;
     int rocketIndex = 0;
     std::deque<Explosion *> explosions;
+    std::set<uintptr_t> explosionsWithinRangeOfPlayer;
 
-    ContactListener cl(world, explosions);
+    ContactListener cl(world, explosions, explosionsWithinRangeOfPlayer);
     world.SetContactListener(&cl);
 
     Camera2D camera;
@@ -144,6 +164,14 @@ int main(int argc, char *argv[]) {
             explosions.pop_front();
             delete endedExplosion;
         }
+    };
+
+    auto updatePlayer = [&]() {
+        for (uintptr_t explosionUserData: explosionsWithinRangeOfPlayer) {
+            auto explosion = reinterpret_cast<Explosion *>(explosionUserData);
+            player.feelExplosion(*explosion);
+        }
+        player.update(SIMULATION_STEP_INTERVAL);
     };
 
     auto updateRockets = [&]() {
@@ -192,7 +220,7 @@ int main(int argc, char *argv[]) {
             world.Step(SIMULATION_STEP_INTERVAL, SIMULATION_VELOCITY_ITER, SIMULATION_POSITION_ITER);
             // process explosions first to allow frame-1-explosion interactions to happen
             updateExplosions();
-            player.update(SIMULATION_STEP_INTERVAL);
+            updatePlayer();
             updateRockets();
 
             timeSlice -= SIMULATION_STEP_INTERVAL;

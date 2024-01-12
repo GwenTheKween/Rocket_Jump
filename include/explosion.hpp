@@ -4,6 +4,7 @@
 
 class Explosion: public Entity {
     float timeAliveRatio;
+    float animRadius;
 
 public:
     Explosion(b2World& world, b2Vec2 position);

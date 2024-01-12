@@ -1,23 +1,19 @@
 #include "explosion.hpp"
 
 #include <cmath>
+#include <algorithm>
 
 #include "world.hpp"
 
 constexpr float lifetime = 1.0f;
 constexpr float initialRadius = 1.0f;
 constexpr float maxRadius = 4.0f;
-constexpr float baseStrength = 4000.0f;
+constexpr float hitboxRadius = 3.0f;
+constexpr float baseStrength = 600.0f;
 
-
-float clamp01(float t) {
-    if (t < 0) return 0;
-    if (t > 1) return 1;
-    return t;
-}
 
 float explosionExpansionEasing(float t) {
-    t = clamp01(t);
+    t = std::clamp(t, 0.0f, 1.0f);
     return 1 - std::pow(1 - t, 3);
 }
 
@@ -30,7 +26,7 @@ b2Body *constructExplosionBody(b2World& world, b2Vec2 position) {
 
 b2Shape *constructExplosionShape() {
     b2CircleShape *shape = new b2CircleShape();
-    shape->m_radius = initialRadius;
+    shape->m_radius = hitboxRadius;
     return shape;
 }
 
@@ -43,17 +39,18 @@ Explosion::Explosion(b2World& world, b2Vec2 position):
         Entity::EntityType::EXPLOSION,
         Entity::EntityType::PLAYER | Entity::EntityType::ROCKET
     ),
-    timeAliveRatio(0) {}
+    timeAliveRatio(0),
+    animRadius(initialRadius) {}
 
 void Explosion::update(float deltaTime) {
     timeAliveRatio += deltaTime / lifetime;
     float easedExpansionTime = explosionExpansionEasing(timeAliveRatio);
-    fixture->GetShape()->m_radius = std::lerp(initialRadius, maxRadius, easedExpansionTime);
+    animRadius = std::lerp(initialRadius, maxRadius, easedExpansionTime);
 }
 
 void Explosion::render() const {
     Vector2 center = raylibPosition();
-    float raylibRadius = metersToPixels(fixture->GetShape()->m_radius);
+    float raylibRadius = metersToPixels(animRadius);
     DrawCircleLinesV(center, raylibRadius, YELLOW);
 }
 
@@ -62,5 +59,5 @@ bool Explosion::isOver() const {
 }
 
 float Explosion::calculateStrength() const {
-    return baseStrength / fixture->GetShape()->m_radius;
+    return baseStrength / animRadius;
 }
