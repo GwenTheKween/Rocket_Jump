@@ -180,13 +180,15 @@ bool Player::startChargingRecoil() {
     }
 }
 
-void Player::recoilFrom(b2Vec2 origin) {
+void Player::recoilFrom(b2Vec2 origin, RecoilWave& recoilWave) {
     if (!chargingRecoil) return;
     auto direction = box2dPosition() - origin;
     direction.Normalize();
     auto impulse = recoilImpulse(recoilCharge.progress());
     body->ApplyLinearImpulseToCenter(impulse * direction, true);
     chargingRecoil = false;
+    //TODO offset recoilwave along the movement axis so it spawns further behind the player
+    recoilWave.moveTo(box2dPosition(), direction);
     recoilCharge.reset();
     recoilReload.reset();
 }

@@ -20,7 +20,8 @@ public:
         PLAYER = 0x0001,
         TERRAIN = 0x0002,
         ROCKET = 0x0004,
-        EXPLOSION = 0x0008
+        EXPLOSION = 0x0008,
+        RECOIL_WAVE = 0x00A0,
     };
     const EntityType type;
 

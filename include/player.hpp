@@ -7,6 +7,7 @@
 #include "entity.hpp"
 #include "rocket.hpp"
 #include "timer.hpp"
+#include "recoilwave.hpp"
 
 class Player: public Entity {
 private:
@@ -36,6 +37,6 @@ public:
     float getRecoilReload() const;
     Rocket *shootRocketTowards(b2Vec2 target);
     bool startChargingRecoil();
-    void recoilFrom(b2Vec2 origin);
+    void recoilFrom(b2Vec2 origin, RecoilWave& recoilWave);
     void feelExplosion(const Explosion& explosion);
 };

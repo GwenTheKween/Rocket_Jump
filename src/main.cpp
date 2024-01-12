@@ -12,6 +12,7 @@
 #include "rocket.hpp"
 #include "world.hpp"
 #include "explosion.hpp"
+#include "recoilwave.hpp"
 
 Explosion *spawnExplosion(b2World& world, b2Vec2 position) {
     return new Explosion(world, position);
@@ -87,7 +88,9 @@ public:
             case Type::EXPLOSION:
                 break;
             case Type::TERRAIN:
-                // TODO destructible terrain
+                // TODO destructible terrain, maybe on separate entity type
+                break;
+            case Type::RECOIL_WAVE:
                 break;
             }
             return;
@@ -135,6 +138,7 @@ int main(int argc, char *argv[]) {
     const int screenWidth = 1600;
     const int screenHeight = 900;
 
+    // TODO reset button
     InitWindow(screenWidth, screenHeight, "Rocket Jump!");
     SetTargetFPS(60);
 
@@ -148,6 +152,7 @@ int main(int argc, char *argv[]) {
     int rocketIndex = 0;
     std::deque<Explosion *> explosions;
     std::set<uintptr_t> explosionsWithinRangeOfPlayer;
+    RecoilWave recoilWave(world);
 
     ContactListener cl(world, explosions, explosionsWithinRangeOfPlayer);
     world.SetContactListener(&cl);
@@ -210,7 +215,7 @@ int main(int argc, char *argv[]) {
             // use cached value if available
             if (!mousePosInWorld)
                 mousePosInWorld = getMousePositionInWorld(camera);
-            player.recoilFrom(mousePosInWorld.value());
+            player.recoilFrom(mousePosInWorld.value(), recoilWave);
         }
     };
 
@@ -222,6 +227,7 @@ int main(int argc, char *argv[]) {
             updateExplosions();
             updatePlayer();
             updateRockets();
+            recoilWave.update(SIMULATION_STEP_INTERVAL);
 
             timeSlice -= SIMULATION_STEP_INTERVAL;
         }
@@ -241,6 +247,8 @@ int main(int argc, char *argv[]) {
                     if (rocket != nullptr)
                         rocket->render();
                 }
+                // render recoil wave before player so it hides it spawning in
+                recoilWave.render();
                 player.render();
                 wall.render();
             EndMode2D();
