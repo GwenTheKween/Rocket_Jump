@@ -21,8 +21,8 @@ constexpr int rocketCountSegments = 20;
 
 constexpr float recoilChargeTime = 2.0f;
 constexpr float recoilReloadTime = 3.0f;
-constexpr float recoilMinImpulse = 3.0f;
-constexpr float recoilMaxImpulse = 5.0f;
+constexpr float recoilMinImpulse = 30.0f;
+constexpr float recoilMaxImpulse = 50.0f;
 
 constexpr float pi = static_cast<float>(std::numbers::pi);
 
@@ -183,6 +183,7 @@ bool Player::startChargingRecoil() {
 void Player::recoilFrom(b2Vec2 origin) {
     if (!chargingRecoil) return;
     auto direction = box2dPosition() - origin;
+    direction.Normalize();
     auto impulse = recoilImpulse(recoilCharge.progress());
     body->ApplyLinearImpulseToCenter(impulse * direction, true);
     chargingRecoil = false;
