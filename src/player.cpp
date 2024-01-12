@@ -3,6 +3,7 @@
 #include <raylib.h>
 #include <complex>
 #include <numbers>
+#include <algorithm>
 
 #include "world.hpp"
 
@@ -11,13 +12,30 @@ constexpr float radius = 1.0f;
 constexpr float mass = 1.0f;
 constexpr float approxArea = radius * radius;
 constexpr float density = mass / approxArea;
+
 constexpr float rocketCountMarginBottom = 0.1f;
 constexpr float rocketCountTriangleRadius = 0.4f;
 constexpr float rocketCountFilledDotRadius = 0.2f;
 constexpr float rocketCountEmptyDotRadius = 0.1f;
 constexpr int rocketCountSegments = 20;
 
+constexpr float recoilChargeTime = 2.0f;
+constexpr float recoilReloadTime = 3.0f;
+constexpr float recoilMinImpulse = 3.0f;
+constexpr float recoilMaxImpulse = 5.0f;
+
 constexpr float pi = static_cast<float>(std::numbers::pi);
+
+// ease out sine
+float recoilEasing(float t) {
+    t = std::clamp(t, 0.0f, 1.0f);
+    return std::sin(t * pi * 0.5f);
+}
+
+float recoilImpulse(float chargeProgress) {
+    float alpha = recoilEasing(chargeProgress);
+    return std::lerp(recoilMinImpulse, recoilMaxImpulse, alpha);
+}
 
 struct PlayerAmmoDotPositions {
     std::array<b2Vec2, Player::maxRockets> dots;
@@ -70,8 +88,8 @@ Player::Player(b2World& world, b2Vec2 position):
         EntityType::TERRAIN | EntityType::EXPLOSION
     ),
     rocketReload(Player::rocketReloadTime, [this](){this->doRocketReload();}),
-    recoilReload(Player::recoilReloadTime),
-    recoilCharge(Player::recoilChargeTime)
+    recoilReload(recoilReloadTime),
+    recoilCharge(recoilChargeTime)
 {
     recoilReload.setToComplete();
 }
@@ -132,6 +150,10 @@ float Player::getRocketReload() const {
     return rocketReload.timeLeft();
 }
 
+float Player::getRecoilReload() const {
+    return recoilReload.timeLeft();
+}
+
 void Player::doRocketReload() {
     if (rocketAmmo < Player::maxRockets) {
         rocketAmmo++;
@@ -160,8 +182,12 @@ bool Player::startChargingRecoil() {
 
 void Player::recoilFrom(b2Vec2 origin) {
     if (!chargingRecoil) return;
+    auto direction = box2dPosition() - origin;
+    auto impulse = recoilImpulse(recoilCharge.progress());
+    body->ApplyLinearImpulseToCenter(impulse * direction, true);
     chargingRecoil = false;
     recoilCharge.reset();
+    recoilReload.reset();
 }
 
 void Player::feelExplosion(const Explosion& explosion) {

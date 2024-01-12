@@ -13,10 +13,6 @@ private:
     Timer rocketReload;
     Timer recoilReload;
     Timer recoilCharge;
-    // float rocketReload = 0.0f;
-    // float recoilReload = 0.0f;
-    // float recoilCharge = 0.0f;
-    // TODO create a class to manage all these progress bars
 
     bool chargingRecoil = false;
     int rocketAmmo = Player::maxRockets;
@@ -24,12 +20,9 @@ private:
     void updateTimers(float deltaTime);
     void doRocketReload();
 public:
-    static constexpr float rocketReloadTime = 2.0f;
-    static constexpr float recoilChargeTime = 2.0f;
-    static constexpr float recoilReloadTime = 1.5f;
     static constexpr int maxRockets = 3;
+    static constexpr float rocketReloadTime = 2.0f;
 
-    // TODO is this really necessary? might detract from fast gameplay
     static_assert(Player::rocketReloadTime > Rocket::lifetime);
 
     // TODO draw rocket count UI in a fixed position on the screen
@@ -40,6 +33,7 @@ public:
     void render() const;
     int getRocketAmmo() const;
     float getRocketReload() const;
+    float getRecoilReload() const;
     Rocket *shootRocketTowards(b2Vec2 target);
     bool startChargingRecoil();
     void recoilFrom(b2Vec2 origin);

@@ -179,6 +179,7 @@ int main(int argc, char *argv[]) {
         }
 
         if (IsMouseButtonReleased(MouseButton::MOUSE_BUTTON_RIGHT)) {
+            // use cached value if available
             if (!mousePosInWorld)
                 mousePosInWorld = getMousePositionInWorld(camera);
             player.recoilFrom(mousePosInWorld.value());
@@ -219,6 +220,7 @@ int main(int argc, char *argv[]) {
 #ifdef DEBUG
             write(player.getRocketAmmo(), 0, 0, 32, WHITE);
             write(player.getRocketReload(), 0, 32, 32, WHITE);
+            write(player.getRecoilReload(), 0, 64, 32, WHITE);
 #endif
         EndDrawing();
     }
