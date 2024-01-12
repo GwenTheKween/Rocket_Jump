@@ -198,11 +198,9 @@ debug_mode = yep
 endif
 
 ifneq (,$(findstring gdb,$(MAKECMDGOALS)))
-RUN_CMD := gdb $(RUN_CMD)
+RUN_CMD := gdb -tui $(RUN_CMD)
 debug_mode = yep
 endif
-
-RUN_CMD := $(RUN_CMD) $(ARGS)
 
 ifdef debug_mode
 C_FLAGS += $(DEBUG_FLAGS)
@@ -211,11 +209,9 @@ endif
 all: $(OUT)
 
 run:
-	@printf "====================\n"
-	@$(RUN_CMD) | tee $(STDOUT_LOG)
-	@printf "====================\n"
+	@$(RUN_CMD)
 
-gdb: run
+gdb: all run
 
 
 clean:
