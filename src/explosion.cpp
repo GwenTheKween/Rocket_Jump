@@ -17,6 +17,11 @@ float explosionExpansionEasing(float t) {
     return 1 - std::pow(1 - t, 3);
 }
 
+float explosionAlphaEasing(float t) {
+    if (t == 0) return 0;
+    else return std::pow(2, 10*t - 10);
+}
+
 b2Body *constructExplosionBody(b2World& world, b2Vec2 position) {
     b2BodyDef bodyDef = Entity::defaultBodyDef();
     bodyDef.position = position;
@@ -51,7 +56,9 @@ void Explosion::update(float deltaTime) {
 void Explosion::render() const {
     Vector2 center = raylibPosition();
     float raylibRadius = metersToPixels(animRadius);
-    DrawCircleLinesV(center, raylibRadius, YELLOW);
+    Color color = YELLOW;
+    color.a = 255 * (1.0f - explosionAlphaEasing(timeAliveRatio));
+    DrawCircleLinesV(center, raylibRadius, color);
 }
 
 bool Explosion::isOver() const {
