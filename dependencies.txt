@@ -1,0 +1,2 @@
+Box2D v2.4.1
+Raylib v5.0
