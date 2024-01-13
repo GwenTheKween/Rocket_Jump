@@ -1,2 +1,3 @@
 Box2D v2.4.1
 Raylib v5.0
+JSON11 (already included in source as json11.cpp and json11.hpp)

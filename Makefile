@@ -198,7 +198,7 @@ debug_mode = yep
 endif
 
 ifneq (,$(findstring gdb,$(MAKECMDGOALS)))
-RUN_CMD := gdb -tui $(RUN_CMD)
+RUN_CMD := gdb $(RUN_CMD)
 debug_mode = yep
 endif
 

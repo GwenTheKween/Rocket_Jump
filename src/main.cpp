@@ -6,6 +6,8 @@
 #include <deque>
 #include <optional>
 #include <set>
+#include <fstream>
+#include <iostream>
 
 #include "player.hpp"
 #include "wall.hpp"
@@ -13,14 +15,11 @@
 #include "world.hpp"
 #include "explosion.hpp"
 #include "recoilwave.hpp"
+#include "json11.hpp"
 
-Explosion *spawnExplosion(b2World& world, b2Vec2 position) {
-    return new Explosion(world, position);
-}
-
-void explode(b2World& world, std::deque<Explosion *>& explosions, Rocket *rocket, b2Vec2 position) {
+void explode(b2World& world, std::deque<Explosion *>& explosions, b2Vec2 position) {
     // if it explodes in the air, spawn explosion at its center
-    auto explosion = spawnExplosion(world, position);
+    auto explosion = new Explosion(world, position);
     explosions.push_back(explosion);
     // DO NOT DELETE ROCKET
     // this is done in the cleanup stage of spawning explosions
@@ -121,7 +120,7 @@ public:
 
     void processQueuedExplosionIfAny() {
         if (shouldCreateExplosion) {
-            explode(world, explosions, explodingRocket, explosionLocation);
+            explode(world, explosions, explosionLocation);
             shouldCreateExplosion = false;
         }
     }
@@ -134,9 +133,49 @@ void write(const T& what, int x, int y, float fontSize, Color color) {
     DrawText(buf.str().c_str(), x, y, fontSize, color);
 }
 
+// Obtained from stack overflow
+// https://stackoverflow.com/a/116220
+auto readFile(std::string_view path) -> std::string {
+    constexpr auto read_size = std::size_t(4096);
+    auto stream = std::ifstream(path.data());
+    stream.exceptions(std::ios_base::badbit);
+
+    if (not stream) {
+        throw std::ios_base::failure("file does not exist");
+    }
+
+    auto out = std::string();
+    auto buf = std::string(read_size, '\0');
+    while (stream.read(& buf[0], read_size)) {
+        out.append(buf, 0, stream.gcount());
+    }
+    out.append(buf, 0, stream.gcount());
+    return out;
+}
+
+std::optional<json11::Json> parseJson(const std::string_view& filename) {
+    std::string dump = readFile(filename);
+    std::string err;
+    json11::Json obj = json11::Json::parse(dump, err);
+    if (obj.is_null()) {
+        std::cerr << err << std::endl;
+        return std::nullopt;
+    } else {
+        return obj;
+    }
+}
+
 int main(int argc, char *argv[]) {
     const int screenWidth = 1600;
     const int screenHeight = 900;
+
+    // {
+    //     std::optional<json11::Json> jv = parseJson(".vscode/c_cpp_properties.json");
+    //     std::string jsonObjDump;
+    //     jv.value_or(json11::Json::NUL).dump(jsonObjDump);
+    //     std::cout << jsonObjDump << std::endl;
+    //     return 0;
+    // }
 
     // TODO reset button
     InitWindow(screenWidth, screenHeight, "Rocket Jump!");
@@ -184,7 +223,7 @@ int main(int argc, char *argv[]) {
             if (rocket != nullptr) {
                 rocket->update(SIMULATION_STEP_INTERVAL);
                 if (rocket->shouldExplodeByAge())
-                    explode(world, explosions, rocket, rocket->box2dPosition());
+                    explode(world, explosions, rocket->box2dPosition());
             }
         }
         cl.processQueuedExplosionIfAny();
